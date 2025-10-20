@@ -1,1 +1,0 @@
-mvn -f ms-courses spring-boot:run
