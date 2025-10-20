@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElevenLabs Voice Selector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    select, button, textarea {
+      margin-top: 10px;
+      padding: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #status {
+      margin-top: 20px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>Selecciona una voz de ElevenLabs</h2>
+  <select id="voiceSelect">
+    <option value="">Cargando voces...</option>
+  </select>
+  <textarea id="textInput" rows="4" placeholder="Escribe el texto que deseas escuchar..."></textarea>
+  <button onclick="playText()">▶️ Reproducir</button>
+  <button onclick="pauseOrResumeAudio()">⏸️ Pausar/Reanudar</button>
+  <button onclick="loadVoices()">🔄 Recargar Voces</button>
+  <div id="status"></div>
+
+  <script>
+    const apiKey = "sk_1a23cde668fc657bce32db522b74fe25b6bbe1b8b7c3407b";
+    let currentAudio = null;
+    let isPaused = false;
+
+    const staticVoices = [
+      { id: "9BWtsMINqrJLrRacOk9x", name: "Aria", language: "Inglés" },
+      { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", language: "Inglés" },
+      { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", language: "Inglés" },
+      { id: "IKne3meq5aSn9XLyUdCD", name: "Charlie", language: "Inglés" },
+      { id: "JBFqnCBsd6RMkjVDRZzb", name: "George", language: "Inglés" },
+      { id: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", language: "Inglés" },
+      { id: "SAz9YHcvj6GT2YYXdXww", name: "River", language: "Inglés" },
+      { id: "TX3LPaxmHKxFdv7VOQHJ", name: "Liam", language: "Inglés" },
+      { id: "XB0fDUnXU5powFXDhCwa", name: "Charlotte", language: "Inglés" },
+      { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", language: "Inglés" },
+      { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", language: "Inglés" },
+      { id: "bIHbv24MWmeRgasZH58o", name: "Will", language: "Inglés" },
+      { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica", language: "Inglés" },
+      { id: "cjVigY5qzO86Huf0OWal", name: "Eric", language: "Inglés" },
+      { id: "iP95p4xoKVk53GoZ742B", name: "Chris", language: "Inglés" },
+      { id: "nPczCjzI2devNBz1zQrb", name: "Brian", language: "Inglés" },
+      { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", language: "Inglés" },
+      { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", language: "Inglés" },
+      { id: "pqHfZKP75CvOlQylNhV4", name: "Bill", language: "Inglés" },
+      { id: "ljWLDJb7OMkYo3VM9z8g", name: "El Nero", language: "Inglés" },
+      { id: "9TcPbUAhHnAV8mzFDAWU", name: "El Faraon 2 - Ancient Narrator", language: "Español" },
+      { id: "kjHz50TasdqbpbfK4uaN", name: "Melissa - Young voice from Costa Rica", language: "Español" },
+      { id: "cPoqAvGWCPfCfyPMwe4z", name: "Kallixis - Monster & Deep", language: "Español" },
+      { id: "8lbMAldPdNgaVy6tKwSs", name: "Mario - Warm Storyteller", language: "Español" },
+      { id: "dy2OtpAv7rTroA3VBRUd", name: "Alex Comunicando", language: "Español" },
+      { id: "tXgbXPnsMpKXkuTgvE3h", name: "Elena - Stories and Narrations", language: "Español" },
+      { id: "SKjgN71N3MeGl4r2JbRt", name: "Bruno Torres", language: "Español" },
+      { id: "4enMglmEIYpK0bGn0QuZ", name: "Lizy - Mystery Stories", language: "Español" }
+    ];
+
+    function loadVoices() {
+      const select = document.getElementById("voiceSelect");
+      select.innerHTML = "";
+      staticVoices.forEach(v => {
+        const option = document.createElement("option");
+        option.value = v.id;
+        option.textContent = `${v.name} [${v.language}]`;
+        select.appendChild(option);
+      });
+      document.getElementById("status").textContent = `✅ Se cargaron ${staticVoices.length} voces.`;
+    }
+
+    async function playText() {
+      const voiceId = document.getElementById("voiceSelect").value;
+      const text = document.getElementById("textInput").value.trim();
+      if (!voiceId || !text) {
+        alert("Selecciona una voz y escribe un texto.");
+        return;
+      }
+
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        isPaused = false;
+      }
+
+      const payload = {
+        text: text,
+        //model_id: "eleven_turbo_v2",
+        //model_id: "eleven_multilingual_v2",
+        //model_id: "eleven_turbo_v2_5",
+        model_id: "eleven_flash_v2_5",
+        // voice_settings: {
+        //   stability: 0.75,
+        //   similarity_boost: 0.8,
+        //   style: 0.0,
+        //   use_speaker_boost: true
+        // }
+        voice_settings: {
+          stability: 0.1,
+          similarity_boost: 0.5,
+          style: 0.3,
+          use_speaker_boost: true
+        }
+      };
+
+      try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+          method: "POST",
+          headers: {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("No se pudo generar el audio");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        currentAudio = new Audio(url);
+        currentAudio.play();
+        isPaused = false;
+      } catch (error) {
+        document.getElementById("status").textContent = `❌ ${error.message}`;
+      }
+    }
+
+    function pauseOrResumeAudio() {
+      if (currentAudio) {
+        if (isPaused) {
+          currentAudio.play();
+          isPaused = false;
+        } else {
+          currentAudio.pause();
+          isPaused = true;
+        }
+      }
+    }
+
+    loadVoices();
+  </script>
+</body>
+</html>
