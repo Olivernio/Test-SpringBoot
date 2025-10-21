@@ -1,6 +1,7 @@
 package com.acured.clinica.controller;
 
-import com.acured.clinica.entity.Tratamiento;
+import com.acured.common.dto.TratamientoCreateDTO;
+import com.acured.common.dto.TratamientoDTO;
 import com.acured.clinica.service.TratamientoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,26 @@ public class TratamientoController {
     private TratamientoService tratamientoService;
 
     @GetMapping
-    public ResponseEntity<List<Tratamiento>> obtenerTodos() {
+    public ResponseEntity<List<TratamientoDTO>> obtenerTodos() {
         return ResponseEntity.ok(tratamientoService.obtenerTodosLosTratamientos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tratamiento> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<TratamientoDTO> obtenerPorId(@PathVariable Integer id) {
         return tratamientoService.obtenerTratamientoPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Tratamiento> crearTratamiento(@RequestBody Tratamiento tratamiento) {
-        Tratamiento nuevo = tratamientoService.guardarTratamiento(tratamiento);
+    public ResponseEntity<TratamientoDTO> crearTratamiento(@RequestBody TratamientoCreateDTO dto) {
+        TratamientoDTO nuevo = tratamientoService.guardarTratamiento(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tratamiento> actualizarTratamiento(@PathVariable Integer id, @RequestBody Tratamiento tratamiento) {
-        Tratamiento actualizado = tratamientoService.actualizarTratamiento(id, tratamiento);
+    public ResponseEntity<TratamientoDTO> actualizarTratamiento(@PathVariable Integer id, @RequestBody TratamientoCreateDTO dto) {
+        TratamientoDTO actualizado = tratamientoService.actualizarTratamiento(id, dto);
         if (actualizado != null) {
             return ResponseEntity.ok(actualizado);
         } else {

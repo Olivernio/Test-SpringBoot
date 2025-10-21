@@ -1,17 +1,21 @@
 package com.acured.clinica.service;
 
 import com.acured.clinica.entity.Cita;
-import com.acured.clinica.entity.DetalleCitaTratamiento;
-import com.acured.clinica.entity.SesionTerapeutica;
+import com.acured.clinica.entity.CentroMedico;
+import com.acured.clinica.entity.Paciente;
+import com.acured.clinica.mapper.CitaMapper;
 import com.acured.clinica.repository.CitaRepository;
-import com.acured.clinica.repository.DetalleCitaTratamientoRepository;
-import com.acured.clinica.repository.SesionTerapeuticaRepository;
+import com.acured.clinica.repository.CentroMedicoRepository;
+import com.acured.clinica.repository.PacienteRepository;
+import com.acured.common.dto.CitaCreateDTO;
+import com.acured.common.dto.CitaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CitaService {
@@ -20,79 +24,80 @@ public class CitaService {
     private CitaRepository citaRepository;
 
     @Autowired
-    private SesionTerapeuticaRepository sesionRepository;
+    private PacienteRepository pacienteRepository;
 
     @Autowired
-    private DetalleCitaTratamientoRepository detalleRepository;
+    private CentroMedicoRepository centroMedicoRepository;
 
-    // --- Métodos de Cita ---
+    @Autowired
+    private CitaMapper citaMapper;
+    
+    // NOTA: Inyecta SesionTerapeuticaRepository y DetalleCitaTratamientoRepository
+    // si mantienes los métodos para agregar sesiones/detalles.
 
     @Transactional(readOnly = true)
-    public List<Cita> obtenerTodasLasCitas() {
-        return citaRepository.findAll();
+    public List<CitaDTO> obtenerTodasLasCitas() {
+        return citaRepository.findAll().stream()
+                .map(citaMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public Optional<Cita> obtenerCitaPorId(Integer id) {
-        return citaRepository.findById(id);
+    public Optional<CitaDTO> obtenerCitaPorId(Integer id) {
+        return citaRepository.findById(id)
+                .map(citaMapper::toDTO);
     }
 
     @Transactional
-    public Cita guardarCita(Cita cita) {
-        // La lógica de @PrePersist en la entidad Cita se encargará
-        // de poner el estado 'pendiente' si viene nulo.
-        return citaRepository.save(cita);
+    public CitaDTO guardarCita(CitaCreateDTO dto) {
+        Cita cita = citaMapper.toEntity(dto);
+
+        // Asignamos Paciente y Centro desde los IDs
+        Paciente paciente = pacienteRepository.findById(dto.getPacienteId())
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+        CentroMedico centro = centroMedicoRepository.findById(dto.getCentroId())
+                .orElseThrow(() -> new RuntimeException("Centro médico no encontrado"));
+        
+        cita.setPaciente(paciente);
+        cita.setCentroMedico(centro);
+        
+        Cita guardada = citaRepository.save(cita);
+        return citaMapper.toDTO(guardada);
     }
 
     @Transactional
-    public Cita actualizarCita(Integer id, Cita citaActualizada) {
+    public CitaDTO actualizarCita(Integer id, CitaCreateDTO dto) {
         Optional<Cita> citaExistenteOpt = citaRepository.findById(id);
         
         if (citaExistenteOpt.isPresent()) {
             Cita citaExistente = citaExistenteOpt.get();
             
-            citaExistente.setPaciente(citaActualizada.getPaciente());
-            citaExistente.setTerapeutaId(citaActualizada.getTerapeutaId());
-            citaExistente.setCentroMedico(citaActualizada.getCentroMedico());
-            citaExistente.setFecha(citaActualizada.getFecha());
-            citaExistente.setEstado(citaActualizada.getEstado());
-            citaExistente.setMotivo(citaActualizada.getMotivo());
+            // Asignamos Paciente y Centro desde los IDs
+            Paciente paciente = pacienteRepository.findById(dto.getPacienteId())
+                    .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+            CentroMedico centro = centroMedicoRepository.findById(dto.getCentroId())
+                    .orElseThrow(() -> new RuntimeException("Centro médico no encontrado"));
+
+            citaExistente.setPaciente(paciente);
+            citaExistente.setTerapeutaId(dto.getTerapeutaId());
+            citaExistente.setCentroMedico(centro);
+            citaExistente.setFecha(dto.getFecha());
+            citaExistente.setMotivo(dto.getMotivo());
+            // Opcional: permitir actualizar estado
+            // citaExistente.setEstado(dto.getEstado()); 
             
-            return citaRepository.save(citaExistente);
+            Cita actualizada = citaRepository.save(citaExistente);
+            return citaMapper.toDTO(actualizada);
         } else {
-            // Considera lanzar una excepción aquí (ej. ResourceNotFoundException)
             return null;
         }
     }
 
     @Transactional
     public void eliminarCita(Integer id) {
-        // Esto eliminará la cita y, gracias a `cascade = CascadeType.ALL`
-        // en la entidad Cita, también eliminará sus detalles y sesiones asociadas.
         citaRepository.deleteById(id);
     }
 
-    // --- Métodos para entidades relacionadas (ejemplos) ---
-
-    @Transactional
-    public SesionTerapeutica agregarSesionACita(Integer citaId, SesionTerapeutica sesion) {
-        Optional<Cita> citaOpt = citaRepository.findById(citaId);
-        if (citaOpt.isPresent()) {
-            sesion.setCita(citaOpt.get());
-            return sesionRepository.save(sesion);
-        } else {
-            return null; // O lanzar excepción
-        }
-    }
-
-    @Transactional
-    public DetalleCitaTratamiento agregarTratamientoACita(Integer citaId, DetalleCitaTratamiento detalle) {
-        Optional<Cita> citaOpt = citaRepository.findById(citaId);
-        if (citaOpt.isPresent()) {
-            detalle.setCita(citaOpt.get());
-            return detalleRepository.save(detalle);
-        } else {
-            return null; // O lanzar excepción
-        }
-    }
+    // ... (Puedes mantener los métodos de agregarSesion/Detalle aquí,
+    // pero necesitarán ser actualizados para usar DTOs también)
 }

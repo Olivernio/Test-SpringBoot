@@ -1,6 +1,7 @@
 package com.acured.clinica.controller;
 
-import com.acured.clinica.entity.CentroMedico;
+import com.acured.common.dto.CentroMedicoCreateDTO;
+import com.acured.common.dto.CentroMedicoDTO;
 import com.acured.clinica.service.CentroMedicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,26 @@ public class CentroMedicoController {
     private CentroMedicoService centroMedicoService;
 
     @GetMapping
-    public ResponseEntity<List<CentroMedico>> obtenerTodos() {
+    public ResponseEntity<List<CentroMedicoDTO>> obtenerTodos() {
         return ResponseEntity.ok(centroMedicoService.obtenerTodosLosCentros());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CentroMedico> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<CentroMedicoDTO> obtenerPorId(@PathVariable Integer id) {
         return centroMedicoService.obtenerCentroPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<CentroMedico> crearCentro(@RequestBody CentroMedico centroMedico) {
-        CentroMedico nuevo = centroMedicoService.guardarCentro(centroMedico);
+    public ResponseEntity<CentroMedicoDTO> crearCentro(@RequestBody CentroMedicoCreateDTO dto) {
+        CentroMedicoDTO nuevo = centroMedicoService.guardarCentro(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CentroMedico> actualizarCentro(@PathVariable Integer id, @RequestBody CentroMedico centroMedico) {
-        CentroMedico actualizado = centroMedicoService.actualizarCentro(id, centroMedico);
+    public ResponseEntity<CentroMedicoDTO> actualizarCentro(@PathVariable Integer id, @RequestBody CentroMedicoCreateDTO dto) {
+        CentroMedicoDTO actualizado = centroMedicoService.actualizarCentro(id, dto);
         if (actualizado != null) {
             return ResponseEntity.ok(actualizado);
         } else {

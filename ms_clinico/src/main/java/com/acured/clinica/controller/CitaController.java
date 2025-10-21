@@ -1,6 +1,7 @@
 package com.acured.clinica.controller;
 
-import com.acured.clinica.entity.Cita;
+import com.acured.common.dto.CitaCreateDTO;
+import com.acured.common.dto.CitaDTO;
 import com.acured.clinica.service.CitaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,30 +18,39 @@ public class CitaController {
     private CitaService citaService;
 
     @GetMapping
-    public ResponseEntity<List<Cita>> obtenerTodas() {
+    public ResponseEntity<List<CitaDTO>> obtenerTodas() {
         return ResponseEntity.ok(citaService.obtenerTodasLasCitas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cita> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<CitaDTO> obtenerPorId(@PathVariable Integer id) {
         return citaService.obtenerCitaPorId(id)
-                .map(ResponseEntity::ok) // Forma corta de .map(cita -> ResponseEntity.ok(cita))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Cita> crearCita(@RequestBody Cita cita) {
-        Cita nuevaCita = citaService.guardarCita(cita);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+    public ResponseEntity<CitaDTO> crearCita(@RequestBody CitaCreateDTO dto) {
+        try {
+            CitaDTO nuevaCita = citaService.guardarCita(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+        } catch (RuntimeException e) {
+            // Captura errores si el paciente o centro no se encuentran
+            return ResponseEntity.badRequest().build(); 
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cita> actualizarCita(@PathVariable Integer id, @RequestBody Cita citaActualizada) {
-        Cita actualizada = citaService.actualizarCita(id, citaActualizada);
-        if (actualizada != null) {
-            return ResponseEntity.ok(actualizada);
-        } else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<CitaDTO> actualizarCita(@PathVariable Integer id, @RequestBody CitaCreateDTO dto) {
+        try {
+            CitaDTO actualizada = citaService.actualizarCita(id, dto);
+            if (actualizada != null) {
+                return ResponseEntity.ok(actualizada);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -53,8 +63,4 @@ public class CitaController {
             return ResponseEntity.notFound().build();
         }
     }
-    
-    // Aquí podrías agregar endpoints para manejar Sesiones y Detalles, por ejemplo:
-    // @PostMapping("/{id}/sesiones")
-    // ...
 }

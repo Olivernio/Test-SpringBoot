@@ -1,6 +1,7 @@
 package com.acured.clinica.controller;
 
-import com.acured.clinica.entity.Especialidad;
+import com.acured.common.dto.EspecialidadCreateDTO;
+import com.acured.common.dto.EspecialidadDTO;
 import com.acured.clinica.service.EspecialidadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,26 @@ public class EspecialidadController {
     private EspecialidadService especialidadService;
 
     @GetMapping
-    public ResponseEntity<List<Especialidad>> obtenerTodas() {
+    public ResponseEntity<List<EspecialidadDTO>> obtenerTodas() {
         return ResponseEntity.ok(especialidadService.obtenerTodasLasEspecialidades());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Especialidad> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<EspecialidadDTO> obtenerPorId(@PathVariable Integer id) {
         return especialidadService.obtenerEspecialidadPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Especialidad> crearEspecialidad(@RequestBody Especialidad especialidad) {
-        Especialidad nueva = especialidadService.guardarEspecialidad(especialidad);
+    public ResponseEntity<EspecialidadDTO> crearEspecialidad(@RequestBody EspecialidadCreateDTO dto) {
+        EspecialidadDTO nueva = especialidadService.guardarEspecialidad(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Especialidad> actualizarEspecialidad(@PathVariable Integer id, @RequestBody Especialidad especialidad) {
-        Especialidad actualizada = especialidadService.actualizarEspecialidad(id, especialidad);
+    public ResponseEntity<EspecialidadDTO> actualizarEspecialidad(@PathVariable Integer id, @RequestBody EspecialidadCreateDTO dto) {
+        EspecialidadDTO actualizada = especialidadService.actualizarEspecialidad(id, dto);
         if (actualizada != null) {
             return ResponseEntity.ok(actualizada);
         } else {
