@@ -12,4 +12,6 @@ public class CentroMedicoCreateDTO {
     private String email;
     private String sitioWeb;
     private Integer paisId;
+
+    // =============== Validaciones faltantes con las anotaciones @ ===============
 }

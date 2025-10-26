@@ -36,6 +36,7 @@ public class CentroMedico {
     @Column(name = "pais_id") 
     private Integer paisId; 
     
+    // ====================== Descartar la idea de implementación de clases en los JPAs; complejidad inecesaria ======================
     // Relaciones inversas
     @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
     private Set<Cita> citas;
