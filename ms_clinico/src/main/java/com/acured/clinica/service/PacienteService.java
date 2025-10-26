@@ -1,87 +1,62 @@
 package com.acured.clinica.service;
 
 import com.acured.clinica.entity.Paciente;
-import com.acured.clinica.mapper.PacienteMapper; // IMPORTANTE
+import com.acured.clinica.mapper.PacienteMapper;
 import com.acured.clinica.repository.PacienteRepository;
-import com.acured.common.dto.PacienteCreateDTO; // IMPORTANTE
-import com.acured.common.dto.PacienteDTO; // IMPORTANTE
-import org.springframework.beans.factory.annotation.Autowired;
+import com.acured.common.dto.PacienteDTO;
+// Consider creating a custom exception in common module
+// import com.acured.common.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors; // IMPORTANTE
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PacienteService {
 
-    @Autowired
-    private PacienteRepository pacienteRepository;
+    private final PacienteRepository pacienteRepository;
+    private final PacienteMapper pacienteMapper;
 
-    @Autowired
-    private PacienteMapper pacienteMapper; // 1. Inyectamos el Mapper
-
-    /**
-     * Ahora devuelve una lista de DTOs
-     */
     @Transactional(readOnly = true)
     public List<PacienteDTO> obtenerTodosLosPacientes() {
         return pacienteRepository.findAll()
                 .stream()
-                .map(pacienteMapper::toDTO) // 2. Convertimos cada entidad a DTO
+                .map(pacienteMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Ahora devuelve un DTO
-     */
     @Transactional(readOnly = true)
-    public Optional<PacienteDTO> obtenerPacientePorId(Integer id) {
-        return pacienteRepository.findById(id)
-                .map(pacienteMapper::toDTO); // 3. Convertimos la entidad a DTO
+    public PacienteDTO obtenerPacientePorId(Integer id) {
+        Paciente paciente = pacienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + id)); // Replace with ResourceNotFoundException
+        return pacienteMapper.toDTO(paciente);
     }
 
-    /**
-     * Ahora recibe un DTO para crear
-     */
     @Transactional
-    public PacienteDTO guardarPaciente(PacienteCreateDTO pacienteDTO) {
-        // 4. Convertimos el DTO a Entidad
+    public PacienteDTO guardarPaciente(PacienteDTO pacienteDTO) {
+        // Add business logic validation if needed (e.g., check if usuarioId is valid via Feign Client)
         Paciente paciente = pacienteMapper.toEntity(pacienteDTO);
-        
-        // 5. Guardamos la Entidad
         Paciente pacienteGuardado = pacienteRepository.save(paciente);
-        
-        // 6. Convertimos la Entidad guardada de nuevo a DTO para la respuesta
         return pacienteMapper.toDTO(pacienteGuardado);
     }
 
     @Transactional
-    public void eliminarPaciente(Integer id) {
-        pacienteRepository.deleteById(id);
+    public PacienteDTO actualizarPaciente(Integer id, PacienteDTO pacienteDTO) {
+        Paciente pacienteExistente = pacienteRepository.findById(id)
+                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + id)); // Replace with ResourceNotFoundException
+
+        pacienteMapper.updateEntityFromDto(pacienteDTO, pacienteExistente);
+
+        Paciente pacienteActualizado = pacienteRepository.save(pacienteExistente);
+        return pacienteMapper.toDTO(pacienteActualizado);
     }
 
-    /**
-     * Ahora recibe un DTO para actualizar
-     */
     @Transactional
-    public PacienteDTO actualizarPaciente(Integer id, PacienteCreateDTO pacienteActualizadoDTO) {
-        Optional<Paciente> pacienteExistenteOpt = pacienteRepository.findById(id);
-        
-        if (pacienteExistenteOpt.isPresent()) {
-            Paciente pacienteExistente = pacienteExistenteOpt.get();
-            
-            // Actualizamos la entidad con los datos del DTO
-            pacienteExistente.setFechaNacimiento(pacienteActualizadoDTO.getFechaNacimiento());
-            pacienteExistente.setGenero(pacienteActualizadoDTO.getGenero());
-            pacienteExistente.setObservaciones(pacienteActualizadoDTO.getObservaciones());
-            pacienteExistente.setUsuarioId(pacienteActualizadoDTO.getUsuarioId());
-            
-            Paciente pacienteActualizado = pacienteRepository.save(pacienteExistente);
-            return pacienteMapper.toDTO(pacienteActualizado);
-        } else {
-            return null;
-        }
+    public void eliminarPaciente(Integer id) {
+         Paciente paciente = pacienteRepository.findById(id)
+                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + id)); // Check existence before delete
+        pacienteRepository.delete(paciente);
     }
 }

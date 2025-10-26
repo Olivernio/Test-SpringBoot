@@ -1,21 +1,20 @@
 package com.acured.clinica.controller;
 
-import com.acured.common.dto.EspecialidadCreateDTO;
 import com.acured.common.dto.EspecialidadDTO;
 import com.acured.clinica.service.EspecialidadService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/clinico/especialidades")
+@RequiredArgsConstructor
 public class EspecialidadController {
 
-    @Autowired
-    private EspecialidadService especialidadService;
+    private final EspecialidadService especialidadService;
 
     @GetMapping
     public ResponseEntity<List<EspecialidadDTO>> obtenerTodas() {
@@ -24,34 +23,23 @@ public class EspecialidadController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EspecialidadDTO> obtenerPorId(@PathVariable Integer id) {
-        return especialidadService.obtenerEspecialidadPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(especialidadService.obtenerEspecialidadPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<EspecialidadDTO> crearEspecialidad(@RequestBody EspecialidadCreateDTO dto) {
+    public ResponseEntity<EspecialidadDTO> crearEspecialidad(@Valid @RequestBody EspecialidadDTO dto) {
         EspecialidadDTO nueva = especialidadService.guardarEspecialidad(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EspecialidadDTO> actualizarEspecialidad(@PathVariable Integer id, @RequestBody EspecialidadCreateDTO dto) {
-        EspecialidadDTO actualizada = especialidadService.actualizarEspecialidad(id, dto);
-        if (actualizada != null) {
-            return ResponseEntity.ok(actualizada);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<EspecialidadDTO> actualizarEspecialidad(@PathVariable Integer id, @Valid @RequestBody EspecialidadDTO dto) {
+        return ResponseEntity.ok(especialidadService.actualizarEspecialidad(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarEspecialidad(@PathVariable Integer id) {
-        if (especialidadService.obtenerEspecialidadPorId(id).isPresent()) {
-            especialidadService.eliminarEspecialidad(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        especialidadService.eliminarEspecialidad(id);
+        return ResponseEntity.noContent().build();
     }
 }

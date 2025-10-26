@@ -1,31 +1,24 @@
 package com.acured.clinica.service;
 
-import com.acured.clinica.entity.Especialidad;
+import com.acured.clinica.entity.Especialidad; // Needed for check
 import com.acured.clinica.entity.Tratamiento;
 import com.acured.clinica.mapper.TratamientoMapper;
-import com.acured.clinica.repository.EspecialidadRepository;
+import com.acured.clinica.repository.EspecialidadRepository; // Needed for check
 import com.acured.clinica.repository.TratamientoRepository;
-import com.acured.common.dto.TratamientoCreateDTO;
 import com.acured.common.dto.TratamientoDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TratamientoService {
 
-    @Autowired
-    private TratamientoRepository tratamientoRepository;
-
-    @Autowired
-    private EspecialidadRepository especialidadRepository; // Necesario para buscar por ID
-
-    @Autowired
-    private TratamientoMapper tratamientoMapper;
+    private final TratamientoRepository tratamientoRepository;
+    private final EspecialidadRepository especialidadRepository; // To validate especialidadId
+    private final TratamientoMapper tratamientoMapper;
 
     @Transactional(readOnly = true)
     public List<TratamientoDTO> obtenerTodosLosTratamientos() {
@@ -35,55 +28,45 @@ public class TratamientoService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<TratamientoDTO> obtenerTratamientoPorId(Integer id) {
-        return tratamientoRepository.findById(id)
-                .map(tratamientoMapper::toDTO);
+    public TratamientoDTO obtenerTratamientoPorId(Integer id) {
+        Tratamiento tratamiento = tratamientoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tratamiento no encontrado con ID: " + id));
+        return tratamientoMapper.toDTO(tratamiento);
     }
 
     @Transactional
-    public TratamientoDTO guardarTratamiento(TratamientoCreateDTO dto) {
+    public TratamientoDTO guardarTratamiento(TratamientoDTO dto) {
+        // Validate especialidadId exists
+        especialidadRepository.findById(dto.getEspecialidadId())
+            .orElseThrow(() -> new RuntimeException("Especialidad no encontrada con ID: " + dto.getEspecialidadId()));
+
         Tratamiento tratamiento = tratamientoMapper.toEntity(dto);
-        
-        // Asignamos la especialidad desde el ID
-        if (dto.getEspecialidadId() != null) {
-            Especialidad especialidad = especialidadRepository.findById(dto.getEspecialidadId())
-                    .orElseThrow(() -> new RuntimeException("Especialidad no encontrada")); // O manejo de error
-            tratamiento.setEspecialidad(especialidad);
-        }
-        
         Tratamiento guardado = tratamientoRepository.save(tratamiento);
         return tratamientoMapper.toDTO(guardado);
     }
 
     @Transactional
-    public TratamientoDTO actualizarTratamiento(Integer id, TratamientoCreateDTO dto) {
-        Optional<Tratamiento> existenteOpt = tratamientoRepository.findById(id);
-        
-        if (existenteOpt.isPresent()) {
-            Tratamiento existente = existenteOpt.get();
-            existente.setNombre(dto.getNombre());
-            existente.setDescripcion(dto.getDescripcion());
-            existente.setDuracionMin(dto.getDuracionMin());
-            existente.setPrecio(dto.getPrecio());
-            
-            // Asignamos la especialidad desde el ID
-            if (dto.getEspecialidadId() != null) {
-                Especialidad especialidad = especialidadRepository.findById(dto.getEspecialidadId())
-                        .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
-                existente.setEspecialidad(especialidad);
-            } else {
-                existente.setEspecialidad(null);
-            }
-            
-            Tratamiento actualizado = tratamientoRepository.save(existente);
-            return tratamientoMapper.toDTO(actualizado);
-        } else {
-            return null;
+    public TratamientoDTO actualizarTratamiento(Integer id, TratamientoDTO dto) {
+        Tratamiento existente = tratamientoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tratamiento no encontrado con ID: " + id));
+
+        // Validate new especialidadId if provided and changed
+        if (dto.getEspecialidadId() != null && !dto.getEspecialidadId().equals(existente.getEspecialidadId())) {
+             especialidadRepository.findById(dto.getEspecialidadId())
+                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada con ID: " + dto.getEspecialidadId()));
         }
+
+        tratamientoMapper.updateEntityFromDto(dto, existente); // MapStruct handles update
+
+        Tratamiento actualizado = tratamientoRepository.save(existente);
+        return tratamientoMapper.toDTO(actualizado);
     }
 
     @Transactional
     public void eliminarTratamiento(Integer id) {
-        tratamientoRepository.deleteById(id);
+        Tratamiento tratamiento = tratamientoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tratamiento no encontrado con ID: " + id));
+        // Consider related DetalleCitaTratamiento or ServicioCentro before deleting
+        tratamientoRepository.delete(tratamiento);
     }
 }

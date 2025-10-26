@@ -1,20 +1,20 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.util.Set;
+import lombok.Getter; 
+import lombok.Setter; 
 
+import java.time.LocalDateTime;
+
+@Getter 
+@Setter 
 @Entity
 @Table(name = "centro_medico")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CentroMedico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable= false)
     private Integer id;
 
     @Column(name = "nombre", nullable = false, length = 200)
@@ -35,11 +35,4 @@ public class CentroMedico {
     // Guardamos solo el ID, asumiendo que Pais es de otro microservicio/contexto
     @Column(name = "pais_id") 
     private Integer paisId; 
-    
-    // Relaciones inversas
-    @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
-    private Set<Cita> citas;
-
-    @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
-    private Set<ServicioCentro> serviciosCentro;
 }

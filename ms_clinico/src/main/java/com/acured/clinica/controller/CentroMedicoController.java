@@ -1,21 +1,20 @@
 package com.acured.clinica.controller;
 
-import com.acured.common.dto.CentroMedicoCreateDTO;
 import com.acured.common.dto.CentroMedicoDTO;
 import com.acured.clinica.service.CentroMedicoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/clinico/centros-medicos")
+@RequiredArgsConstructor
+@RequestMapping("/api/clinico/centros-medicos") // Changed path for clarity
 public class CentroMedicoController {
 
-    @Autowired
-    private CentroMedicoService centroMedicoService;
+    private final CentroMedicoService centroMedicoService;
 
     @GetMapping
     public ResponseEntity<List<CentroMedicoDTO>> obtenerTodos() {
@@ -24,34 +23,23 @@ public class CentroMedicoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CentroMedicoDTO> obtenerPorId(@PathVariable Integer id) {
-        return centroMedicoService.obtenerCentroPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(centroMedicoService.obtenerCentroPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<CentroMedicoDTO> crearCentro(@RequestBody CentroMedicoCreateDTO dto) {
+    public ResponseEntity<CentroMedicoDTO> crearCentro(@Valid @RequestBody CentroMedicoDTO dto) {
         CentroMedicoDTO nuevo = centroMedicoService.guardarCentro(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CentroMedicoDTO> actualizarCentro(@PathVariable Integer id, @RequestBody CentroMedicoCreateDTO dto) {
-        CentroMedicoDTO actualizado = centroMedicoService.actualizarCentro(id, dto);
-        if (actualizado != null) {
-            return ResponseEntity.ok(actualizado);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<CentroMedicoDTO> actualizarCentro(@PathVariable Integer id, @Valid @RequestBody CentroMedicoDTO dto) {
+        return ResponseEntity.ok(centroMedicoService.actualizarCentro(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarCentro(@PathVariable Integer id) {
-        if (centroMedicoService.obtenerCentroPorId(id).isPresent()) {
-            centroMedicoService.eliminarCentro(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        centroMedicoService.eliminarCentro(id);
+        return ResponseEntity.noContent().build();
     }
 }

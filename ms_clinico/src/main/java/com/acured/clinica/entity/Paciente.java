@@ -1,21 +1,20 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate;
-import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDate;
+
+@Getter 
+@Setter 
 @Entity
 @Table(name = "paciente")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Paciente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false) 
     private Integer id;
 
     // ID del usuario (de otro microservicio). No hacemos JOIN.
@@ -30,11 +29,4 @@ public class Paciente {
 
     @Column(name = "observaciones", columnDefinition = "TEXT")
     private String observaciones;
-    
-    // Relaciones inversas
-    @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<HistorialMedico> historial;
-
-    @OneToMany(mappedBy = "paciente", fetch = FetchType.LAZY)
-    private Set<Cita> citas;
 }

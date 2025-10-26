@@ -1,31 +1,25 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "detalle_cita_tratamiento")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class DetalleCitaTratamiento {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
 
-    // Relación: Muchos detalles pertenecen a una cita
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cita_id")
-    private Cita cita;
+    @Column(name = "cita_id")
+    private Integer citaId;
 
-    // Relación: Muchos detalles apuntan a un tratamiento
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tratamiento_id")
-    private Tratamiento tratamiento;
-    
+    @Column(name = "tratamiento_id")
+    private Integer tratamientoId;
+
     @Column(name = "observacion", columnDefinition = "TEXT")
     private String observacion;
 }

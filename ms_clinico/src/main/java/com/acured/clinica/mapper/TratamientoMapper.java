@@ -1,41 +1,19 @@
 package com.acured.clinica.mapper;
 
-import com.acured.common.dto.TratamientoCreateDTO;
 import com.acured.common.dto.TratamientoDTO;
-import com.acured.clinica.entity.Especialidad;
 import com.acured.clinica.entity.Tratamiento;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.BeanMapping;
 
-@Component
-public class TratamientoMapper {
+@Mapper(componentModel = "spring")
+public interface TratamientoMapper {
 
-    @Autowired
-    private EspecialidadMapper especialidadMapper;
+    TratamientoDTO toDTO(Tratamiento entity);
 
-    public TratamientoDTO toDTO(Tratamiento tratamiento) {
-        if (tratamiento == null) return null;
-        TratamientoDTO dto = new TratamientoDTO();
-        dto.setId(tratamiento.getId());
-        dto.setNombre(tratamiento.getNombre());
-        dto.setDescripcion(tratamiento.getDescripcion());
-        dto.setDuracionMin(tratamiento.getDuracionMin());
-        dto.setPrecio(tratamiento.getPrecio());
-        // Mapea la especialidad anidada si no es nula
-        if (tratamiento.getEspecialidad() != null) {
-            dto.setEspecialidad(especialidadMapper.toDTO(tratamiento.getEspecialidad()));
-        }
-        return dto;
-    }
+    Tratamiento toEntity(TratamientoDTO dto);
 
-    public Tratamiento toEntity(TratamientoCreateDTO dto) {
-        if (dto == null) return null;
-        Tratamiento tratamiento = new Tratamiento();
-        tratamiento.setNombre(dto.getNombre());
-        tratamiento.setDescripcion(dto.getDescripcion());
-        tratamiento.setDuracionMin(dto.getDuracionMin());
-        tratamiento.setPrecio(dto.getPrecio());
-        // La especialidad se asignará en el Servicio
-        return tratamiento;
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(TratamientoDTO dto, @MappingTarget Tratamiento entity);
 }

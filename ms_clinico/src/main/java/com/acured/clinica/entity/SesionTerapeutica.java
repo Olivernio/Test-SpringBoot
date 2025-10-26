@@ -1,38 +1,26 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "sesion_terapeutica")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class SesionTerapeutica {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
 
-    // Relación: Muchas sesiones pueden pertenecer a una cita
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cita_id")
-    private Cita cita;
-    
-    @Column(name = "fecha")
+    @Column(name = "cita_id")
+    private Integer citaId;
+
+    @Column(name = "fecha", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP") // Assuming DB default
     private LocalDateTime fecha;
 
     @Column(name = "notas", columnDefinition = "TEXT")
     private String notas;
-    
-    // Asigna la fecha actual antes de guardar
-    @PrePersist
-    protected void onCreate() {
-        if (this.fecha == null) {
-            this.fecha = LocalDateTime.now();
-        }
-    }
 }

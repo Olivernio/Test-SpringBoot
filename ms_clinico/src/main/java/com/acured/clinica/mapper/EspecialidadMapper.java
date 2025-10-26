@@ -1,25 +1,19 @@
 package com.acured.clinica.mapper;
 
-import com.acured.common.dto.EspecialidadCreateDTO;
 import com.acured.common.dto.EspecialidadDTO;
 import com.acured.clinica.entity.Especialidad;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.BeanMapping;
 
-@Component
-public class EspecialidadMapper {
+@Mapper(componentModel = "spring")
+public interface EspecialidadMapper {
 
-    public EspecialidadDTO toDTO(Especialidad especialidad) {
-        if (especialidad == null) return null;
-        EspecialidadDTO dto = new EspecialidadDTO();
-        dto.setId(especialidad.getId());
-        dto.setNombre(especialidad.getNombre());
-        return dto;
-    }
+    EspecialidadDTO toDTO(Especialidad entity);
 
-    public Especialidad toEntity(EspecialidadCreateDTO dto) {
-        if (dto == null) return null;
-        Especialidad especialidad = new Especialidad();
-        especialidad.setNombre(dto.getNombre());
-        return especialidad;
-    }
+    Especialidad toEntity(EspecialidadDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(EspecialidadDTO dto, @MappingTarget Especialidad entity);
 }

@@ -3,24 +3,19 @@ package com.acured.clinica.service;
 import com.acured.clinica.entity.CentroMedico;
 import com.acured.clinica.mapper.CentroMedicoMapper;
 import com.acured.clinica.repository.CentroMedicoRepository;
-import com.acured.common.dto.CentroMedicoCreateDTO;
 import com.acured.common.dto.CentroMedicoDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CentroMedicoService {
 
-    @Autowired
-    private CentroMedicoRepository centroMedicoRepository;
-
-    @Autowired
-    private CentroMedicoMapper centroMedicoMapper;
+    private final CentroMedicoRepository centroMedicoRepository;
+    private final CentroMedicoMapper centroMedicoMapper;
 
     @Transactional(readOnly = true)
     public List<CentroMedicoDTO> obtenerTodosLosCentros() {
@@ -30,40 +25,36 @@ public class CentroMedicoService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<CentroMedicoDTO> obtenerCentroPorId(Integer id) {
-        return centroMedicoRepository.findById(id)
-                .map(centroMedicoMapper::toDTO);
+    public CentroMedicoDTO obtenerCentroPorId(Integer id) {
+        CentroMedico centro = centroMedicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Centro Médico no encontrado con ID: " + id));
+        return centroMedicoMapper.toDTO(centro);
     }
 
     @Transactional
-    public CentroMedicoDTO guardarCentro(CentroMedicoCreateDTO dto) {
+    public CentroMedicoDTO guardarCentro(CentroMedicoDTO dto) {
+        // Add validation if needed (e.g., check if paisId exists)
         CentroMedico centro = centroMedicoMapper.toEntity(dto);
         CentroMedico guardado = centroMedicoRepository.save(centro);
         return centroMedicoMapper.toDTO(guardado);
     }
 
     @Transactional
-    public CentroMedicoDTO actualizarCentro(Integer id, CentroMedicoCreateDTO dto) {
-        Optional<CentroMedico> existenteOpt = centroMedicoRepository.findById(id);
-        
-        if (existenteOpt.isPresent()) {
-            CentroMedico existente = existenteOpt.get();
-            existente.setNombre(dto.getNombre());
-            existente.setDireccion(dto.getDireccion());
-            existente.setTelefono(dto.getTelefono());
-            existente.setEmail(dto.getEmail());
-            existente.setSitioWeb(dto.getSitioWeb());
-            existente.setPaisId(dto.getPaisId());
-            
-            CentroMedico actualizado = centroMedicoRepository.save(existente);
-            return centroMedicoMapper.toDTO(actualizado);
-        } else {
-            return null;
-        }
+    public CentroMedicoDTO actualizarCentro(Integer id, CentroMedicoDTO dto) {
+        CentroMedico existente = centroMedicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Centro Médico no encontrado con ID: " + id));
+
+        centroMedicoMapper.updateEntityFromDto(dto, existente);
+
+        CentroMedico actualizado = centroMedicoRepository.save(existente);
+        return centroMedicoMapper.toDTO(actualizado);
     }
 
     @Transactional
     public void eliminarCentro(Integer id) {
-        centroMedicoRepository.deleteById(id);
+        CentroMedico centro = centroMedicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Centro Médico no encontrado con ID: " + id));
+        // Consider related data (e.g., Citas) before deleting or use cascading deletes carefully
+        centroMedicoRepository.delete(centro);
     }
 }

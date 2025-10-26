@@ -1,20 +1,21 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter; 
+import lombok.Setter; 
 import java.math.BigDecimal;
 
+import java.time.LocalDateTime;
+
+@Getter 
+@Setter 
 @Entity
 @Table(name = "servicio_centro")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ServicioCentro {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
 
     // Relación: Muchos servicios pertenecen a un centro
