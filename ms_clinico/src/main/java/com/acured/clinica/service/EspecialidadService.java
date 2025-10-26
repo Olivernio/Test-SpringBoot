@@ -3,11 +3,17 @@ package com.acured.clinica.service;
 import com.acured.clinica.entity.Especialidad;
 import com.acured.clinica.mapper.EspecialidadMapper;
 import com.acured.clinica.repository.EspecialidadRepository;
+import com.acured.common.dto.EspecialidadCreateDTO;
 import com.acured.common.dto.EspecialidadDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import lombok.Getter; // <--- Make sure this is imported
+import lombok.Setter; // <--- Make sure this is imported
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,35 +31,50 @@ public class EspecialidadService {
     }
 
     @Transactional(readOnly = true)
-    public EspecialidadDTO obtenerEspecialidadPorId(Integer id) {
-        Especialidad especialidad = especialidadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada con ID: " + id));
-        return especialidadMapper.toDTO(especialidad);
+    public Optional<EspecialidadDTO> obtenerEspecialidadPorId(Integer id) {
+        return especialidadRepository.findById(id)
+                .map(especialidadMapper::toDTO);
     }
 
     @Transactional
-    public EspecialidadDTO guardarEspecialidad(EspecialidadDTO dto) {
+    public EspecialidadDTO guardarEspecialidad(EspecialidadCreateDTO dto) {
         Especialidad especialidad = especialidadMapper.toEntity(dto);
-        Especialidad guardada = especialidadRepository.save(especialidad);
-        return especialidadMapper.toDTO(guardada);
+        try {
+            Especialidad guardada = especialidadRepository.save(especialidad);
+            return especialidadMapper.toDTO(guardada);
+        } catch (DataIntegrityViolationException e) {
+            // Captura error si el nombre ya existe (unique constraint del SQL)
+            throw new RuntimeException("La especialidad con nombre '" + dto.getNombre() + "' ya existe.", e);
+        }
     }
 
     @Transactional
-    public EspecialidadDTO actualizarEspecialidad(Integer id, EspecialidadDTO dto) {
+    public EspecialidadDTO actualizarEspecialidad(Integer id, EspecialidadCreateDTO dto) {
         Especialidad existente = especialidadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada con id: " + id));
 
-        especialidadMapper.updateEntityFromDto(dto, existente); // MapStruct handles update
+        existente.setNombre(dto.getNombre());
 
-        Especialidad actualizada = especialidadRepository.save(existente);
-        return especialidadMapper.toDTO(actualizada);
+        try {
+            Especialidad actualizada = especialidadRepository.save(existente);
+            return especialidadMapper.toDTO(actualizada);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("El nombre de especialidad '" + dto.getNombre() + "' ya está en uso.", e);
+        }
     }
 
     @Transactional
     public void eliminarEspecialidad(Integer id) {
-        Especialidad especialidad = especialidadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada con ID: " + id));
-        // Consider related Tratamientos before deleting
-        especialidadRepository.delete(especialidad);
+        if (!especialidadRepository.existsById(id)) {
+            throw new RuntimeException("Especialidad no encontrada con id: " + id);
+        }
+        // El SQL tiene ON DELETE SET NULL para tratamiento.especialidad_id
+        // Debería funcionar, pero capturamos por si acaso.
+        try {
+            especialidadRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            // Esto no debería pasar con SET NULL
+             throw new RuntimeException("No se puede eliminar la especialidad, aún tiene referencias.", e);
+        }
     }
 }

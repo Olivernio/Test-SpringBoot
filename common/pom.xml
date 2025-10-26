@@ -11,7 +11,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>common</artifactId> <name>Acured Common Library</name>
+    <artifactId>common</artifactId>
+    <name>Acured Common Library</name>
     <description>Librería compartida con DTOs y validaciones</description>
     <packaging>jar</packaging>
 
@@ -19,34 +20,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope> </dependency>
-
-        <dependency>
-             <groupId>jakarta.validation</groupId>
-             <artifactId>jakarta.validation-api</artifactId>
-         </dependency>
-
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-<<<<<<< HEAD
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.el</artifactId>
-        </dependency>
-    </dependencies>
-=======
 
         <dependency>
             <groupId>org.glassfish</groupId>
@@ -56,9 +36,10 @@
         <dependency>
              <groupId>org.springframework.cloud</groupId>
              <artifactId>spring-cloud-starter-openfeign</artifactId>
-             <optional>true</optional> </dependency>
-
-    </dependencies>
+             <optional>true</optional> 
+        </dependency>
+        
+        </dependencies>
 
     <build>
         <plugins>
@@ -70,12 +51,11 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
-                         <phase>none</phase> </execution>
+                         <phase>none</phase> 
+                    </execution>
                 </executions>
             </plugin>
-
-             </plugins>
+        </plugins>
     </build>
 
->>>>>>> 8f35b495d95e91b4973fd947cc2b1f23ff6af617
 </project>

@@ -1,20 +1,22 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter; 
-import lombok.Setter; 
+import lombok.Getter; // Asegúrate que esté importado
+import lombok.Setter; // Asegúrate que esté importado
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@Getter 
-@Setter 
 @Entity
 @Table(name = "centro_medico")
+@Getter // Confirmado
+@Setter // Confirmado
+@NoArgsConstructor
+@AllArgsConstructor
 public class CentroMedico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable= false)
+    @Column(name = "id", nullable = false)
     private Integer id;
 
     @Column(name = "nombre", nullable = false, length = 200)
@@ -29,21 +31,11 @@ public class CentroMedico {
     @Column(name = "email", length = 150)
     private String email;
 
+    @Column(name = "pais_id")
+    private Integer paisId; // Se mantiene como ID
+
     @Column(name = "sitio_web", length = 250)
     private String sitioWeb;
 
-    // Guardamos solo el ID, asumiendo que Pais es de otro microservicio/contexto
-    @Column(name = "pais_id") 
-    private Integer paisId; 
-<<<<<<< HEAD
-=======
-    
-    // ====================== Descartar la idea de implementación de clases en los JPAs; complejidad inecesaria ======================
-    // Relaciones inversas
-    @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
-    private Set<Cita> citas;
-
-    @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
-    private Set<ServicioCentro> serviciosCentro;
->>>>>>> 8f35b495d95e91b4973fd947cc2b1f23ff6af617
+    // --- Relaciones OneToMany eliminadas ---
 }

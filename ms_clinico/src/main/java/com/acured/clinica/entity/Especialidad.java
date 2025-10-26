@@ -1,15 +1,17 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter; 
-import lombok.Setter; 
+import lombok.Getter; // Asegúrate que esté importado
+import lombok.Setter; // Asegúrate que esté importado
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@Getter 
-@Setter 
 @Entity
 @Table(name = "especialidad")
+@Getter // Confirmado
+@Setter // Confirmado
+@NoArgsConstructor
+@AllArgsConstructor
 public class Especialidad {
 
     @Id
@@ -19,5 +21,6 @@ public class Especialidad {
 
     @Column(name = "nombre", nullable = false, unique = true, length = 150)
     private String nombre;
-    
+
+    // --- Relación OneToMany eliminada ---
 }

@@ -1,15 +1,20 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Getter; // Asegúrate que esté importado
+import lombok.Setter; // Asegúrate que esté importado
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "tratamiento")
+@Getter // Confirmado
+@Setter // Confirmado
+@NoArgsConstructor
+@AllArgsConstructor
 public class Tratamiento {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -28,5 +33,7 @@ public class Tratamiento {
     private BigDecimal precio;
 
     @Column(name = "especialidad_id")
-    private Integer especialidadId;
+    private Integer especialidadId; // Antes ManyToOne Especialidad
+
+    // --- Relaciones OneToMany eliminadas ---
 }

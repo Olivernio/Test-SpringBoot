@@ -3,13 +3,17 @@ package com.acured.clinica.service;
 import com.acured.clinica.entity.HistorialMedico;
 import com.acured.clinica.mapper.HistorialMedicoMapper;
 import com.acured.clinica.repository.HistorialMedicoRepository;
-import com.acured.clinica.repository.PacienteRepository; // Needed for check
+import com.acured.clinica.repository.PacienteRepository; // Para validar pacienteId
+import com.acured.common.dto.HistorialMedicoCreateDTO;
 import com.acured.common.dto.HistorialMedicoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime; // For setting date
+import lombok.Getter; // <--- Make sure this is imported
+import lombok.Setter; // <--- Make sure this is imported
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,7 +21,7 @@ import java.util.stream.Collectors;
 public class HistorialMedicoService {
 
     private final HistorialMedicoRepository historialRepository;
-    private final PacienteRepository pacienteRepository; // To validate pacienteId
+    private final PacienteRepository pacienteRepository; // Para validar FK
     private final HistorialMedicoMapper historialMapper;
 
     @Transactional(readOnly = true)
@@ -28,41 +32,36 @@ public class HistorialMedicoService {
     }
 
     @Transactional(readOnly = true)
-    public HistorialMedicoDTO obtenerHistorialPorId(Integer id) {
-        HistorialMedico historial = historialRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Historial Médico no encontrado con ID: " + id));
-        return historialMapper.toDTO(historial);
+    public Optional<HistorialMedicoDTO> obtenerHistorialPorId(Integer id) {
+        return historialRepository.findById(id)
+                .map(historialMapper::toDTO);
     }
 
     @Transactional
-    public HistorialMedicoDTO guardarHistorial(HistorialMedicoDTO dto) {
-        // Validate pacienteId exists
-        pacienteRepository.findById(dto.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
+    public HistorialMedicoDTO guardarHistorial(HistorialMedicoCreateDTO dto) {
+        // **Validación FK**
+        validarPaciente(dto.getPacienteId());
 
         HistorialMedico historial = historialMapper.toEntity(dto);
-        // Set registration date if not handled by DB default or if needed before save
-        if (historial.getFechaRegistro() == null) {
-            historial.setFechaRegistro(LocalDateTime.now());
-        }
+        // fecha_registro se maneja con @PrePersist
+
         HistorialMedico guardado = historialRepository.save(historial);
         return historialMapper.toDTO(guardado);
     }
 
     @Transactional
-    public HistorialMedicoDTO actualizarHistorial(Integer id, HistorialMedicoDTO dto) {
+    public HistorialMedicoDTO actualizarHistorial(Integer id, HistorialMedicoCreateDTO dto) {
         HistorialMedico existente = historialRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Historial Médico no encontrado con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Historial médico no encontrado con id: " + id));
 
-        // Validate pacienteId if changed
-        if (dto.getPacienteId() != null && !dto.getPacienteId().equals(existente.getPacienteId())) {
-             pacienteRepository.findById(dto.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
-        }
+        // **Validación FK**
+        validarPaciente(dto.getPacienteId());
 
-        // Don't update fechaRegistro typically
-        dto.setFechaRegistro(null); // Ensure MapStruct doesn't overwrite it if null handling is set
-        historialMapper.updateEntityFromDto(dto, existente); // MapStruct handles update
+        // Actualizar campos
+        existente.setPacienteId(dto.getPacienteId());
+        existente.setDescripcion(dto.getDescripcion());
+        existente.setUrlArchivo(dto.getUrlArchivo());
+        // fecha_registro normalmente no se actualiza, se mantiene la original
 
         HistorialMedico actualizado = historialRepository.save(existente);
         return historialMapper.toDTO(actualizado);
@@ -70,8 +69,19 @@ public class HistorialMedicoService {
 
     @Transactional
     public void eliminarHistorial(Integer id) {
-        HistorialMedico historial = historialRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Historial Médico no encontrado con ID: " + id));
-        historialRepository.delete(historial);
+        if (!historialRepository.existsById(id)) {
+            throw new RuntimeException("Historial médico no encontrado con id: " + id);
+        }
+        // No tiene otras tablas que dependan de él directamente con FK obligatoria
+        historialRepository.deleteById(id);
+    }
+
+     // --- Método auxiliar de validación ---
+    private void validarPaciente(Integer pacienteId) {
+        if (pacienteId != null && !pacienteRepository.existsById(pacienteId)) {
+            throw new RuntimeException("Paciente no encontrado con ID: " + pacienteId);
+        } else if (pacienteId == null) {
+             throw new RuntimeException("El ID del paciente no puede ser nulo para un historial.");
+        }
     }
 }

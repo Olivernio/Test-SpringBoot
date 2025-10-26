@@ -1,25 +1,27 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.Getter; // Asegúrate que esté importado
+import lombok.Setter; // Asegúrate que esté importado
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
-@Getter 
-@Setter 
 @Entity
 @Table(name = "paciente")
+@Getter // Confirmado
+@Setter // Confirmado
+@NoArgsConstructor
+@AllArgsConstructor
 public class Paciente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false) 
+    @Column(name = "id", nullable = false)
     private Integer id;
 
-    // ID del usuario (de otro microservicio). No hacemos JOIN.
     @Column(name = "usuario_id")
-    private Integer usuarioId;
+    private Integer usuarioId; // Se mantiene como ID
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
@@ -29,4 +31,6 @@ public class Paciente {
 
     @Column(name = "observaciones", columnDefinition = "TEXT")
     private String observaciones;
+
+    // --- Relaciones OneToMany eliminadas ---
 }

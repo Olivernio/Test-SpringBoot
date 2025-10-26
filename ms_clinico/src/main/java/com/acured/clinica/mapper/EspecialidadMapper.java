@@ -1,19 +1,18 @@
 package com.acured.clinica.mapper;
 
+import com.acured.common.dto.EspecialidadCreateDTO;
 import com.acured.common.dto.EspecialidadDTO;
 import com.acured.clinica.entity.Especialidad;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.BeanMapping;
 
 @Mapper(componentModel = "spring")
 public interface EspecialidadMapper {
 
-    EspecialidadDTO toDTO(Especialidad entity);
+    EspecialidadDTO toDTO(Especialidad especialidad);
 
-    Especialidad toEntity(EspecialidadDTO dto);
+    Especialidad toEntity(EspecialidadCreateDTO dto);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(EspecialidadDTO dto, @MappingTarget Especialidad entity);
+    // Para actualizar:
+    // import org.mapstruct.MappingTarget;
+    // void updateEntityFromDto(EspecialidadCreateDTO dto, @MappingTarget Especialidad especialidad);
 }

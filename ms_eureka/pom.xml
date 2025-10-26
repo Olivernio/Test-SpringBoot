@@ -11,7 +11,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>ms_eureka</artifactId> <name>ms_eureka</name>
+    <artifactId>ms_eureka</artifactId>
+    <name>ms_eureka</name>
     <description>Eureka Server for Acured</description>
     <packaging>jar</packaging>
 
@@ -26,12 +27,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-         <dependency>
+        
+        <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-         </dependencies>
+    </dependencies>
 
     <build>
         <plugins>
@@ -39,8 +40,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                  <configuration>
-                     <mainClass>com.acured.aureka.EurekaServerApplication</mainClass> </configuration>
+                     <mainClass>com.acured.eureka.EurekaServerApplication</mainClass>
+                 </configuration>
             </plugin>
-             </plugins>
+        </plugins>
     </build>
 </project>

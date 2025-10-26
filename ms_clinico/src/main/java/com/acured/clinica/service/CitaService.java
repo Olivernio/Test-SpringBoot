@@ -3,14 +3,21 @@ package com.acured.clinica.service;
 import com.acured.clinica.entity.Cita;
 import com.acured.clinica.mapper.CitaMapper;
 import com.acured.clinica.repository.CitaRepository;
-import com.acured.clinica.repository.CentroMedicoRepository; // Needed for check
-import com.acured.clinica.repository.PacienteRepository;   // Needed for check
-// Potentially import UserClient if validating terapeutaId
+import com.acured.clinica.repository.CentroMedicoRepository;
+import com.acured.clinica.repository.PacienteRepository;
+// Importar Cliente si validas terapeutaId
+// import com.acured.clinica.client.UserClient;
+import com.acured.common.dto.CitaCreateDTO;
 import com.acured.common.dto.CitaDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException; // Para eliminar
+import lombok.Getter; // <--- Make sure this is imported
+import lombok.Setter; // <--- Make sure this is imported
+
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,10 +25,10 @@ import java.util.stream.Collectors;
 public class CitaService {
 
     private final CitaRepository citaRepository;
-    private final PacienteRepository pacienteRepository; // To validate pacienteId
-    private final CentroMedicoRepository centroMedicoRepository; // To validate centroId
+    private final PacienteRepository pacienteRepository; // Para validar pacienteId
+    private final CentroMedicoRepository centroMedicoRepository; // Para validar centroId
     private final CitaMapper citaMapper;
-    // private final UserClient userClient; // Inject if validating terapeutaId
+    // private final UserClient userClient; // Para validar terapeutaId
 
     @Transactional(readOnly = true)
     public List<CitaDTO> obtenerTodasLasCitas() {
@@ -31,48 +38,42 @@ public class CitaService {
     }
 
     @Transactional(readOnly = true)
-    public CitaDTO obtenerCitaPorId(Integer id) {
-        Cita cita = citaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
-        return citaMapper.toDTO(cita);
+    public Optional<CitaDTO> obtenerCitaPorId(Integer id) {
+        return citaRepository.findById(id)
+                .map(citaMapper::toDTO);
     }
 
     @Transactional
-    public CitaDTO guardarCita(CitaDTO dto) {
-        // Validate foreign keys exist
-        pacienteRepository.findById(dto.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
-        centroMedicoRepository.findById(dto.getCentroId())
-                .orElseThrow(() -> new RuntimeException("Centro Médico no encontrado con ID: " + dto.getCentroId()));
-        // Optional: Validate terapeutaId using UserClient if implemented
-        // userClient.findUsuarioById(dto.getTerapeutaId()); // Feign throws exception if 404
+    public CitaDTO guardarCita(CitaCreateDTO dto) {
+        // **Validaciones FK**
+        validarPaciente(dto.getPacienteId());
+        validarCentroMedico(dto.getCentroId());
+        validarTerapeuta(dto.getTerapeutaId()); // Validaría externamente
 
         Cita cita = citaMapper.toEntity(dto);
-        // Set default status if needed and not handled by DB default
-        if (cita.getEstado() == null) {
-             cita.setEstado("pendiente");
-        }
+        // El estado 'pendiente' y la fecha se manejan con @PrePersist o BD DEFAULT
+
         Cita guardada = citaRepository.save(cita);
         return citaMapper.toDTO(guardada);
     }
 
     @Transactional
-    public CitaDTO actualizarCita(Integer id, CitaDTO dto) {
+    public CitaDTO actualizarCita(Integer id, CitaCreateDTO dto) {
         Cita citaExistente = citaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Cita no encontrada con id: " + id));
 
-        // Validate foreign keys if they are being changed
-        if (dto.getPacienteId() != null && !dto.getPacienteId().equals(citaExistente.getPacienteId())) {
-             pacienteRepository.findById(dto.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado con ID: " + dto.getPacienteId()));
-        }
-        if (dto.getCentroId() != null && !dto.getCentroId().equals(citaExistente.getCentroId())) {
-             centroMedicoRepository.findById(dto.getCentroId())
-                .orElseThrow(() -> new RuntimeException("Centro Médico no encontrado con ID: " + dto.getCentroId()));
-        }
-        // Optional: Validate terapeutaId if changed
+        // **Validaciones FK**
+        validarPaciente(dto.getPacienteId());
+        validarCentroMedico(dto.getCentroId());
+        validarTerapeuta(dto.getTerapeutaId());
 
-        citaMapper.updateEntityFromDto(dto, citaExistente); // MapStruct handles update
+        // Actualizar campos
+        citaExistente.setPacienteId(dto.getPacienteId());
+        citaExistente.setTerapeutaId(dto.getTerapeutaId());
+        citaExistente.setCentroId(dto.getCentroId());
+        citaExistente.setFecha(dto.getFecha());
+        citaExistente.setMotivo(dto.getMotivo());
+        // Podrías añadir lógica para actualizar el 'estado' si es necesario
 
         Cita actualizada = citaRepository.save(citaExistente);
         return citaMapper.toDTO(actualizada);
@@ -80,9 +81,43 @@ public class CitaService {
 
     @Transactional
     public void eliminarCita(Integer id) {
-        Cita cita = citaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
-        // Consider related DetalleCitaTratamiento or SesionTerapeutica before deleting
-        citaRepository.delete(cita);
+        if (!citaRepository.existsById(id)) {
+            throw new RuntimeException("Cita no encontrada con id: " + id);
+        }
+        // El SQL tiene ON DELETE CASCADE para detalle_cita_tratamiento y sesion_terapeutica
+        // Debería borrar en cascada sin problemas. Capturamos por si acaso.
+         try {
+            citaRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            // No debería ocurrir por el CASCADE
+             throw new RuntimeException("No se puede eliminar la cita, tiene dependencias.", e);
+        }
     }
+
+    // --- Métodos auxiliares de validación ---
+    private void validarPaciente(Integer pacienteId) {
+        if (pacienteId != null && !pacienteRepository.existsById(pacienteId)) {
+            throw new RuntimeException("Paciente no encontrado con ID: " + pacienteId);
+        } else if (pacienteId == null) {
+             throw new RuntimeException("El ID del paciente no puede ser nulo."); // Si es obligatorio
+        }
+    }
+
+    private void validarCentroMedico(Integer centroId) {
+        if (centroId != null && !centroMedicoRepository.existsById(centroId)) {
+            throw new RuntimeException("Centro médico no encontrado con ID: " + centroId);
+        } else if (centroId == null) {
+             throw new RuntimeException("El ID del centro médico no puede ser nulo."); // Si es obligatorio
+        }
+    }
+
+     private void validarTerapeuta(Integer terapeutaId) {
+         if (terapeutaId != null) {
+            // Lógica de validación externa (Feign Client)
+            // try { userClient.findById(terapeutaId); } catch (FeignException.NotFound e) { ... }
+             System.out.println("ADVERTENCIA: Validación de terapeutaId no implementada."); // Placeholder
+         } else {
+              throw new RuntimeException("El ID del terapeuta no puede ser nulo."); // Si es obligatorio
+         }
+     }
 }

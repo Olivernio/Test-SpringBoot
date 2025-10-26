@@ -1,16 +1,18 @@
 package com.acured.clinica.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter; 
-import lombok.Setter; 
+import lombok.Getter; // Asegúrate que esté importado
+import lombok.Setter; // Asegúrate que esté importado
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
-import java.time.LocalDateTime;
-
-@Getter 
-@Setter 
 @Entity
 @Table(name = "servicio_centro")
+@Getter // Confirmado
+@Setter // Confirmado
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServicioCentro {
 
     @Id
@@ -18,22 +20,18 @@ public class ServicioCentro {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    // Relación: Muchos servicios pertenecen a un centro
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "centro_id")
-    private CentroMedico centroMedico;
+    @Column(name = "centro_id")
+    private Integer centroId; // Antes ManyToOne CentroMedico
 
-    // Relación: Muchos servicios están asociados a un tratamiento
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tratamiento_id")
-    private Tratamiento tratamiento;
+    @Column(name = "tratamiento_id")
+    private Integer tratamientoId; // Antes ManyToOne Tratamiento
 
     @Column(name = "disponible")
     private Boolean disponible;
 
     @Column(name = "precio", precision = 12, scale = 2)
     private BigDecimal precio;
-    
+
     @Column(name = "duracion_min")
     private Integer duracionMin;
 }
