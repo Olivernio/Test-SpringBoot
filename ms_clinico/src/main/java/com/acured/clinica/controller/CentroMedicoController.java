@@ -26,8 +26,14 @@ public class CentroMedicoController {
         return ResponseEntity.ok(centroMedicoService.obtenerCentroPorId(id));
     }
 
+
+    // UTILIZAR VALIDACIONES CON LAS ANOTACIONES @
     @PostMapping
+<<<<<<< HEAD
     public ResponseEntity<CentroMedicoDTO> crearCentro(@Valid @RequestBody CentroMedicoDTO dto) {
+=======
+    public ResponseEntity<CentroMedicoDTO> crearCentro(@RequestBody @Valid CentroMedicoCreateDTO dto) {
+>>>>>>> 8f35b495d95e91b4973fd947cc2b1f23ff6af617
         CentroMedicoDTO nuevo = centroMedicoService.guardarCentro(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }

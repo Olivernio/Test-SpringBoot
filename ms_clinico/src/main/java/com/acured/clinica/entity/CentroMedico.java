@@ -35,4 +35,15 @@ public class CentroMedico {
     // Guardamos solo el ID, asumiendo que Pais es de otro microservicio/contexto
     @Column(name = "pais_id") 
     private Integer paisId; 
+<<<<<<< HEAD
+=======
+    
+    // ====================== Descartar la idea de implementación de clases en los JPAs; complejidad inecesaria ======================
+    // Relaciones inversas
+    @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
+    private Set<Cita> citas;
+
+    @OneToMany(mappedBy = "centroMedico", fetch = FetchType.LAZY)
+    private Set<ServicioCentro> serviciosCentro;
+>>>>>>> 8f35b495d95e91b4973fd947cc2b1f23ff6af617
 }
