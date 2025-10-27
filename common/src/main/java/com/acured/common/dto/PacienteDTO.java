@@ -13,5 +13,4 @@ public class PacienteDTO {
     private LocalDate fechaNacimiento;
     private String genero;
     private String observaciones;
-    // Ya no contiene Set<HistorialMedico> ni Set<Cita>
 }

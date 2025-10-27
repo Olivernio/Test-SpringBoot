@@ -3,18 +3,22 @@ package com.acured.clinica.mapper;
 import com.acured.common.dto.PacienteCreateDTO;
 import com.acured.common.dto.PacienteDTO;
 import com.acured.clinica.entity.Paciente;
-import org.mapstruct.Mapper;
+// import org.mapstruct.Mapper;
+// import org.mapstruct.Mapping;
+import java.util.List;
 
-@Mapper(componentModel = "spring") // Indica a MapStruct que genere una implementación Spring Bean
+// MAPPER TEMPORALMENTE DESACTIVADO - MapStruct causaba problemas
+// @Mapper(componentModel = "spring")
 public interface PacienteMapper {
 
-    // MapStruct mapeará automáticamente los campos con el mismo nombre
+    // TODOS LOS MÉTODOS COMENTADOS TEMPORALMENTE
+    /*
+    @Mapping(source = "usuarioId", target = "usuarioId")
     PacienteDTO toDTO(Paciente paciente);
 
-    // MapStruct mapeará automáticamente los campos con el mismo nombre
-    Paciente toEntity(PacienteCreateDTO dto);
+    @Mapping(source = "usuarioId", target = "usuarioId")
+    List<PacienteDTO> toDTOList(List<Paciente> pacientes);
 
-    // Si necesitaras actualizar una entidad existente desde un DTO, podrías añadir:
-    // import org.mapstruct.MappingTarget;
-    // void updateEntityFromDto(PacienteCreateDTO dto, @MappingTarget Paciente paciente);
+    Paciente toEntity(PacienteCreateDTO dto);
+    */
 }

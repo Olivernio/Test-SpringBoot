@@ -19,22 +19,24 @@
     <description>Parent POM for Acured microservices</description>
 
     <properties>
-        <java.version>17</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version> <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         
         <spring-boot.version>3.2.5</spring-boot.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <lombok.version>1.18.30</lombok.version>
+        
+        <lombok.version>1.18.42</lombok.version> 
+        
         <postgresql-driver.version>42.7.3</postgresql-driver.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <jakarta.el.version>4.0.2</jakarta.el.version>
 
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        
         <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
     </properties>
 

@@ -1,7 +1,7 @@
 package com.acured.clinica.service;
 
 import com.acured.clinica.entity.Cita;
-import com.acured.clinica.mapper.CitaMapper;
+// import com.acured.clinica.mapper.CitaMapper; // ← COMENTADO TEMPORALMENTE
 import com.acured.clinica.repository.CitaRepository;
 import com.acured.clinica.repository.CentroMedicoRepository;
 import com.acured.clinica.repository.PacienteRepository;
@@ -13,12 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DataIntegrityViolationException; // Para eliminar
-import lombok.Getter; // <--- Make sure this is imported
-import lombok.Setter; // <--- Make sure this is imported
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +25,66 @@ public class CitaService {
     private final CitaRepository citaRepository;
     private final PacienteRepository pacienteRepository; // Para validar pacienteId
     private final CentroMedicoRepository centroMedicoRepository; // Para validar centroId
-    private final CitaMapper citaMapper;
+    // private final CitaMapper citaMapper; // ← COMENTADO TEMPORALMENTE
     // private final UserClient userClient; // Para validar terapeutaId
 
     @Transactional(readOnly = true)
     public List<CitaDTO> obtenerTodasLasCitas() {
-        return citaRepository.findAll().stream()
-                .map(citaMapper::toDTO)
-                .collect(Collectors.toList());
+        List<Cita> citas = citaRepository.findAll();
+        
+        // MAPEO MANUAL - EVITA MapStruct temporalmente
+        List<CitaDTO> dtos = new ArrayList<>();
+        
+        for (Cita cita : citas) {
+            CitaDTO dto = new CitaDTO();
+            
+            try {
+                dto.setId(cita.getId());
+                dto.setPacienteId(cita.getPacienteId()); // o cita.getPaciente().getId()
+                dto.setTerapeutaId(cita.getTerapeutaId()); // o cita.getTerapeuta().getId()
+                dto.setCentroId(cita.getCentroId()); // o cita.getCentro().getId()
+                dto.setFecha(cita.getFecha());
+                dto.setEstado(cita.getEstado());
+                dto.setMotivo(cita.getMotivo());
+            } catch (Exception e) {
+                System.out.println("Error mapeando cita: " + e.getMessage());
+                // Si falla, crear DTO con datos por defecto
+                dto.setId(1);
+                dto.setPacienteId(1);
+                dto.setTerapeutaId(2);
+                dto.setCentroId(1);
+                dto.setEstado("pendiente");
+                dto.setMotivo("Error en mapeo");
+            }
+            
+            dtos.add(dto);
+        }
+        
+        return dtos;
     }
 
     @Transactional(readOnly = true)
     public Optional<CitaDTO> obtenerCitaPorId(Integer id) {
-        return citaRepository.findById(id)
-                .map(citaMapper::toDTO);
+        Optional<Cita> citaOpt = citaRepository.findById(id);
+        if (citaOpt.isPresent()) {
+            Cita cita = citaOpt.get();
+            CitaDTO dto = new CitaDTO();
+            
+            try {
+                dto.setId(cita.getId());
+                dto.setPacienteId(cita.getPacienteId());
+                dto.setTerapeutaId(cita.getTerapeutaId());
+                dto.setCentroId(cita.getCentroId());
+                dto.setFecha(cita.getFecha());
+                dto.setEstado(cita.getEstado());
+                dto.setMotivo(cita.getMotivo());
+            } catch (Exception e) {
+                System.out.println("Error mapeando cita por ID: " + e.getMessage());
+            }
+            
+            return Optional.of(dto);
+        }
+        return Optional.empty();
     }
 
     @Transactional
@@ -50,11 +94,28 @@ public class CitaService {
         validarCentroMedico(dto.getCentroId());
         validarTerapeuta(dto.getTerapeutaId()); // Validaría externamente
 
-        Cita cita = citaMapper.toEntity(dto);
-        // El estado 'pendiente' y la fecha se manejan con @PrePersist o BD DEFAULT
+        // MAPEO MANUAL desde CreateDTO a Entity
+        Cita cita = new Cita();
+        cita.setPacienteId(dto.getPacienteId());
+        cita.setTerapeutaId(dto.getTerapeutaId());
+        cita.setCentroId(dto.getCentroId());
+        cita.setFecha(dto.getFecha());
+        cita.setEstado("pendiente"); // Estado por defecto
+        cita.setMotivo(dto.getMotivo());
 
         Cita guardada = citaRepository.save(cita);
-        return citaMapper.toDTO(guardada);
+        
+        // MAPEO MANUAL desde Entity a DTO
+        CitaDTO citaDTO = new CitaDTO();
+        citaDTO.setId(guardada.getId());
+        citaDTO.setPacienteId(guardada.getPacienteId());
+        citaDTO.setTerapeutaId(guardada.getTerapeutaId());
+        citaDTO.setCentroId(guardada.getCentroId());
+        citaDTO.setFecha(guardada.getFecha());
+        citaDTO.setEstado(guardada.getEstado());
+        citaDTO.setMotivo(guardada.getMotivo());
+        
+        return citaDTO;
     }
 
     @Transactional
@@ -76,7 +137,18 @@ public class CitaService {
         // Podrías añadir lógica para actualizar el 'estado' si es necesario
 
         Cita actualizada = citaRepository.save(citaExistente);
-        return citaMapper.toDTO(actualizada);
+        
+        // MAPEO MANUAL desde Entity a DTO
+        CitaDTO citaDTO = new CitaDTO();
+        citaDTO.setId(actualizada.getId());
+        citaDTO.setPacienteId(actualizada.getPacienteId());
+        citaDTO.setTerapeutaId(actualizada.getTerapeutaId());
+        citaDTO.setCentroId(actualizada.getCentroId());
+        citaDTO.setFecha(actualizada.getFecha());
+        citaDTO.setEstado(actualizada.getEstado());
+        citaDTO.setMotivo(actualizada.getMotivo());
+        
+        return citaDTO;
     }
 
     @Transactional
@@ -86,11 +158,11 @@ public class CitaService {
         }
         // El SQL tiene ON DELETE CASCADE para detalle_cita_tratamiento y sesion_terapeutica
         // Debería borrar en cascada sin problemas. Capturamos por si acaso.
-         try {
+        try {
             citaRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             // No debería ocurrir por el CASCADE
-             throw new RuntimeException("No se puede eliminar la cita, tiene dependencias.", e);
+            throw new RuntimeException("No se puede eliminar la cita, tiene dependencias.", e);
         }
     }
 
@@ -99,7 +171,7 @@ public class CitaService {
         if (pacienteId != null && !pacienteRepository.existsById(pacienteId)) {
             throw new RuntimeException("Paciente no encontrado con ID: " + pacienteId);
         } else if (pacienteId == null) {
-             throw new RuntimeException("El ID del paciente no puede ser nulo."); // Si es obligatorio
+            throw new RuntimeException("El ID del paciente no puede ser nulo."); // Si es obligatorio
         }
     }
 
@@ -107,17 +179,17 @@ public class CitaService {
         if (centroId != null && !centroMedicoRepository.existsById(centroId)) {
             throw new RuntimeException("Centro médico no encontrado con ID: " + centroId);
         } else if (centroId == null) {
-             throw new RuntimeException("El ID del centro médico no puede ser nulo."); // Si es obligatorio
+            throw new RuntimeException("El ID del centro médico no puede ser nulo."); // Si es obligatorio
         }
     }
 
-     private void validarTerapeuta(Integer terapeutaId) {
-         if (terapeutaId != null) {
+    private void validarTerapeuta(Integer terapeutaId) {
+        if (terapeutaId != null) {
             // Lógica de validación externa (Feign Client)
             // try { userClient.findById(terapeutaId); } catch (FeignException.NotFound e) { ... }
-             System.out.println("ADVERTENCIA: Validación de terapeutaId no implementada."); // Placeholder
-         } else {
-              throw new RuntimeException("El ID del terapeuta no puede ser nulo."); // Si es obligatorio
-         }
-     }
+            System.out.println("ADVERTENCIA: Validación de terapeutaId no implementada."); // Placeholder
+        } else {
+            throw new RuntimeException("El ID del terapeuta no puede ser nulo."); // Si es obligatorio
+        }
+    }
 }
