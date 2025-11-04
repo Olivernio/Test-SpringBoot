@@ -22,7 +22,7 @@ public class HistorialMedicoController {
 
     @GetMapping
     public ResponseEntity<List<HistorialMedicoDTO>> obtenerTodos() {
-        return ResponseEntity.ok(historialService.obtenerTodoElHistorial());
+        return ResponseEntity.ok(historialService.obtenerTodosLosHistoriales());
     }
 
     @GetMapping("/{id}")

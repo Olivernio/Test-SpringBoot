@@ -1,23 +1,20 @@
 package com.acured.clinica.service;
 
-import com.acured.clinica.entity.CentroMedico;
-import com.acured.clinica.mapper.CentroMedicoMapper;
-import com.acured.clinica.repository.CentroMedicoRepository;
-// Importar Repositorio o Cliente si validas paisId
-// import com.acured.clinica.repository.PaisRepository; // Si tuvieras tabla local
-// import com.acured.clinica.client.PaisClient; // Si fuera externo
-import com.acured.common.dto.CentroMedicoCreateDTO;
-import com.acured.common.dto.CentroMedicoDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException; // Para manejar FKs al eliminar
-import lombok.Getter; // <--- Make sure this is imported
-import lombok.Setter; // <--- Make sure this is imported
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.acured.clinica.entity.CentroMedico;
+import com.acured.clinica.mapper.CentroMedicoMapper;
+import com.acured.clinica.repository.CentroMedicoRepository; // Para manejar FKs al eliminar
+import com.acured.common.dto.CentroMedicoCreateDTO; // <--- Make sure this is imported
+import com.acured.common.dto.CentroMedicoDTO; // <--- Make sure this is imported
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +27,9 @@ public class CentroMedicoService {
     @Transactional(readOnly = true)
     public List<CentroMedicoDTO> obtenerTodosLosCentros() {
         return centroMedicoRepository.findAll().stream()
-                .map(centroMedicoMapper::toDTO)
-                .collect(Collectors.toList());
+                .map(centroMedicoMapper::toDTO).toList();
+                // Línea anterior
+                // .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -58,7 +56,7 @@ public class CentroMedicoService {
         // **Validación FK (Externa/Local): paisId**
         validarPais(dto.getPaisId()); // Llama al método de validación
 
-        // Actualizar campos
+        // ESTO NO ES NECESARIO, ESTa FUNCION LO HACE EL MAPPER
         existente.setNombre(dto.getNombre());
         existente.setDireccion(dto.getDireccion());
         existente.setTelefono(dto.getTelefono());
