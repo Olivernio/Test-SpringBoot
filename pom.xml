@@ -9,6 +9,7 @@
         <module>ms_clinico</module>
         <module>ms_eureka</module>
         <module>ms_profesionales</module>
+        <module>ms_auditoria</module>
         
         <!-- <module>ms-gateway</module>  -->
     </modules>
