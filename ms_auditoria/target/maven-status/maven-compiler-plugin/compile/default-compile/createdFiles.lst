@@ -1,7 +1,0 @@
-com\acured\auditoria\AuditoriaApplication.class
-com\acured\auditoria\service\AuditoriaService.class
-com\acured\auditoria\entity\Auditoria.class
-com\acured\auditoria\controller\AuditoriaController.class
-com\acured\auditoria\mapper\AuditoriaMapperImpl.class
-com\acured\auditoria\repository\AuditoriaRepository.class
-com\acured\auditoria\mapper\AuditoriaMapper.class

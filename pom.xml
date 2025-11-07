@@ -24,8 +24,11 @@
         <module>common</module>
         <module>ms_eureka</module>
         <module>ms_clinico</module>
-        <module>ms_profesionales</module>
-        <module>ms_auditoria</module>
+        <!-- PROFESIONALES 100% -->
+        <!-- <module>ms_profesionales</module> -->
+
+        <!-- AUDITORÍA 20% -->
+        <!-- <module>ms_auditoria</module> -->
     </modules>
 
     <!--
