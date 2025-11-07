@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- Modelo base de Maven -->
     <modelVersion>4.0.0</modelVersion>
 
-    <modules>
-        <module>common</module>
-        <module>ms_clinico</module>
-        <module>ms_eureka</module>
-        <module>ms_profesionales</module>
-        <module>ms_auditoria</module>
-        
-        <!-- <module>ms-gateway</module>  -->
-    </modules>
-
+    <!--
+        Coordenadas GAV (GroupId, ArtifactId, Version) de tu proyecto padre (Acured)
+    -->
     <groupId>com.acured</groupId>
     <artifactId>clinica-monorepo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -21,30 +16,64 @@
     <name>Clinica Acured Parent Project</name>
     <description>Parent POM for Acured microservices</description>
 
+    <!--
+        Módulos hijos de tu proyecto (Acured).
+        Cada uno es un subproyecto independiente (microservicio o librería común).
+    -->
+    <modules>
+        <module>common</module>
+        <module>ms_eureka</module>
+        <module>ms_clinico</module>
+        <module>ms_profesionales</module>
+        <module>ms_auditoria</module>
+    </modules>
+
+    <!--
+        Propiedades comunes a todos los módulos.
+        Se reutilizan en todo el proyecto para evitar duplicación.
+        (Versiones actualizadas según el POM robusto)
+    -->
     <properties>
-        <java.version>17</java.version> <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version> <!-- Versión de Java (del POM robusto) -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-        <spring-boot.version>3.2.5</spring-boot.version>
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
-        
+
+        <!-- Versiones de Spring (del POM robusto) -->
+        <spring-boot.version>3.5.0</spring-boot.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
+
+        <!-- Versiones de Herramientas (del POM robusto) -->
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        
-        <lombok.version>1.18.42</lombok.version> 
-        
+        <lombok.version>1.18.30</lombok.version>
+
+        <!-- Versión de tu Driver de Base de Datos (PostgreSQL) -->
         <postgresql-driver.version>42.7.3</postgresql-driver.version>
+
+        <!-- Versiones de Validación (del POM robusto) -->
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <jakarta.el.version>4.0.2</jakarta.el.version>
 
-        <maven.compiler.release>17</maven.compiler.release>
-        
-        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
-        
-        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+        <!-- Versiones de Plugins de Maven (del POM robusto) -->
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-clean-plugin.version>3.3.1</maven-clean-plugin.version>
     </properties>
 
+    <!--
+        Sección de gestión centralizada de dependencias.
+        Define las versiones de librerías que serán utilizadas por todos los módulos hijos.
+        No incluye las dependencias, solo las "administra".
+    -->
     <dependencyManagement>
         <dependencies>
+
+            <!--
+                BOM (Bill of Materials) oficial de Spring Boot.
+                Centraliza y alinea las versiones de todas las dependencias de Spring Boot
+                (web, data-jpa, security, etc.).
+                Garantiza compatibilidad y estabilidad.
+            -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -52,6 +81,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!--
+                BOM (Bill of Materials) oficial de Spring Cloud.
+                Gestiona de forma centralizada las versiones compatibles de los módulos de Spring Cloud
+                (Eureka, OpenFeign, Config Server, Gateway, etc.).
+            -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -60,78 +95,175 @@
                 <scope>import</scope>
             </dependency>
 
+            <!--
+                Driver JDBC para PostgreSQL (Mantenido de tu proyecto Acured).
+                Permite que la aplicación se conecte a bases de datos PostgreSQL.
+            -->
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql-driver.version}</version>
             </dependency>
+
+            <!--
+                MapStruct: biblioteca que genera automáticamente el código de mapeo
+                entre clases (Entidades y DTOs).
+            -->
             <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
+
+            <!--
+                Procesador de anotaciones de MapStruct: es quien genera el código
+                durante la compilación, en base a las interfaces @Mapper.
+            -->
             <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
             </dependency>
+
+            <!--
+                Lombok: biblioteca que reduce código repetitivo (boilerplate)
+                con anotaciones (@Data, @Getter, @Setter, @Builder, etc.).
+            -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+                <scope>provided</scope>
             </dependency>
 
+            <!--
+                Spring Boot Starter Validation para validación de datos.
+                Procesa anotaciones como @NotNull, @Email, @Size, @Min, @Max
+                en los DTOs que reciben los @RestController (con @Valid).
+            -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-validation</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
+
+            <!--
+                Hibernate Validator: implementación de la especificación Jakarta Bean Validation.
+                Esencial para que funcionen las validaciones en el módulo `common`
+                si este no es un módulo Spring Boot.
+            -->
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate-validator.version}</version>
             </dependency>
+
+            <!--
+                Jakarta Expression Language (EL): biblioteca necesaria para que Hibernate Validator
+                pueda procesar expresiones dinámicas en los mensajes de error (ej. "el tamaño debe ser entre ${min} y ${max}").
+            -->
             <dependency>
                 <groupId>org.glassfish</groupId>
                 <artifactId>jakarta.el</artifactId>
                 <version>${jakarta.el.version}</version>
             </dependency>
 
+            <!--
+                Módulo común de tu proyecto (Acured):
+                Contiene clases compartidas (DTOs, Excepciones, etc.).
+                Usamos ${project.version} para que siempre coincida con la versión del padre.
+            -->
             <dependency>
                 <groupId>com.acured</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
+    <!--
+        Sección de configuración de construcción del proyecto (build).
+        Define los plugins que Maven usará para compilar y empaquetar.
+    -->
     <build>
+        <!--
+            pluginManagement: Define la configuración de los plugins para
+            que los módulos hijos la hereden.
+        -->
         <pluginManagement>
             <plugins>
+                <!--
+                    Plugin del compilador de Java.
+                    Compila las clases y ejecuta los procesadores de anotaciones
+                    (Lombok y MapStruct).
+                -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <parameters>true</parameters> 
+                        <!-- Usamos <release> en lugar de <source>/<target>, es la forma moderna -->
+                        <release>${java.version}</release>
+
+                        <!--
+                            Permite que los métodos con parámetros mantengan sus nombres reales.
+                            Esencial para que Spring mapee correctamente:
+                            - @PathVariable("id") Long id
+                            - @RequestParam("nombre") String nombre
+                        -->
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+
+                        <!--
+                            Procesadores de anotaciones que deben ejecutarse durante la compilación.
+                        -->
                         <annotationProcessorPaths>
+                            <!--
+                                Procesador de MapStruct: genera clases ...Impl
+                                para las interfaces @Mapper.
+                            -->
                             <path>
                                 <groupId>org.mapstruct</groupId>
                                 <artifactId>mapstruct-processor</artifactId>
                                 <version>${mapstruct.version}</version>
                             </path>
+
+                            <!--
+                                Procesador de Lombok: genera Getters, Setters,
+                                Constructores, etc.
+                            -->
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
                                 <version>${lombok.version}</version>
                             </path>
+
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>0.2.0</version>
+                            </path>
+                            
+                            <!--
+                                NOTA: Si MapStruct y Lombok tienen problemas para trabajar juntos,
+                                a veces es necesario añadir 'lombok-mapstruct-binding'.
+                                Lo omitimos por ahora para mantenerlo simple, como en el POM robusto.
+                            -->
+
                         </annotationProcessorPaths>
+                        
+                        <!-- Línea para que el IDE detecte el código generado -->
                         <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
                     </configuration>
                 </plugin>
 
+                <!--
+                    Plugin oficial de Maven para limpiar el proyecto.
+                    Asegura que el código autogenerado (por MapStruct/Lombok)
+                    se elimine correctamente durante 'mvn clean'.
+                -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
@@ -139,6 +271,7 @@
                     <configuration>
                         <filesets>
                             <fileset>
+                                <!-- Ruta del directorio que contiene el código fuente generado -->
                                 <directory>${project.build.directory}/generated-sources</directory>
                                 <includes>
                                     <include>**/*</include>
@@ -148,6 +281,10 @@
                     </configuration>
                 </plugin>
 
+                <!--
+                    Plugin oficial de Spring Boot.
+                    Permite empaquetar la aplicación como un JAR ejecutable (fat JAR).
+                -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
@@ -155,11 +292,16 @@
                     <executions>
                         <execution>
                             <goals>
+                                <!--
+                                    'repackage' es obligatorio para que el JAR sea ejecutable
+                                    con 'java -jar ...'.
+                                -->
                                 <goal>repackage</goal>
                             </goals>
                         </execution>
                     </executions>
                 </plugin>
+
             </plugins>
         </pluginManagement>
     </build>

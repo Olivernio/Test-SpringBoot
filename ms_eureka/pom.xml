@@ -1,48 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <!-- 1. Herencia del POM padre 'clinica-monorepo' -->
     <parent>
         <groupId>com.acured</groupId>
         <artifactId>clinica-monorepo</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
+    
     <artifactId>ms_eureka</artifactId>
     <name>ms_eureka</name>
-    <description>Eureka Server for Acured</description>
-    <packaging>jar</packaging>
-
+    <description>Eureka Server (Acured)</description>
+    
     <dependencies>
+        <!--
+            Dependencias SIN <version> (Heredadas del padre)
+        -->
+        
+        <!-- Starter de Eureka Server -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
         </dependency>
 
+        <!--
+            Dependencia de Caché (Buena práctica tomada del POM de EduTech)
+            Ayuda a Spring Cloud a gestionar el registro de servicios.
+        -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <!-- 
+                NOTA: No necesitamos gestionar la versión de caffeine en el padre
+                porque el BOM de Spring Boot ya gestiona una versión compatible.
+            -->
+        </dependency>
+
+        <!-- Starter de Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
     </dependencies>
-
+    
+    <!--
+        Sección <build> SIMPLIFICADA
+        Toda la configuración (como 'repackage') se hereda 
+        automáticamente del <pluginManagement> del POM padre.
+    -->
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                 <configuration>
-                     <mainClass>com.acured.eureka.EurekaServerApplication</mainClass>
-                 </configuration>
             </plugin>
         </plugins>
     </build>
+    
 </project>

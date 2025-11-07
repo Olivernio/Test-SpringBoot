@@ -14,7 +14,7 @@ import java.util.List;
 // import java.util.Optional; // Ya no se usa Optional aquí directamente
 
 @RestController
-@RequestMapping("/api/clinico/pacientes")
+@RequestMapping("/api/pacientes")
 @RequiredArgsConstructor // <--- Reemplaza @Autowired
 public class PacienteController {
 

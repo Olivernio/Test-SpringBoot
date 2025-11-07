@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-06T01:06:31-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.16 (Eclipse Adoptium)"
+    date = "2025-11-07T15:31:58-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
 public class EspecialidadMapperImpl implements EspecialidadMapper {
@@ -22,6 +22,9 @@ public class EspecialidadMapperImpl implements EspecialidadMapper {
 
         EspecialidadDTO especialidadDTO = new EspecialidadDTO();
 
+        especialidadDTO.setId( especialidad.getId() );
+        especialidadDTO.setNombre( especialidad.getNombre() );
+
         return especialidadDTO;
     }
 
@@ -32,6 +35,8 @@ public class EspecialidadMapperImpl implements EspecialidadMapper {
         }
 
         Especialidad especialidad = new Especialidad();
+
+        especialidad.setNombre( dto.getNombre() );
 
         return especialidad;
     }

@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/profesionales/especialidades")
+@RequestMapping("/api/especialidades")
 @RequiredArgsConstructor
 public class EspecialidadController { // Esta es la única clase que debe estar en este archivo
 

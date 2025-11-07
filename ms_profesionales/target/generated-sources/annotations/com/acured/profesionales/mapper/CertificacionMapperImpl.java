@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-06T01:06:31-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.16 (Eclipse Adoptium)"
+    date = "2025-11-07T15:31:58-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
 public class CertificacionMapperImpl implements CertificacionMapper {
@@ -21,6 +21,11 @@ public class CertificacionMapperImpl implements CertificacionMapper {
 
         CertificacionDTO certificacionDTO = new CertificacionDTO();
 
+        certificacionDTO.setId( entity.getId() );
+        certificacionDTO.setNombre( entity.getNombre() );
+        certificacionDTO.setInstitucion( entity.getInstitucion() );
+        certificacionDTO.setDescripcion( entity.getDescripcion() );
+
         return certificacionDTO;
     }
 
@@ -32,6 +37,11 @@ public class CertificacionMapperImpl implements CertificacionMapper {
 
         Certificacion certificacion = new Certificacion();
 
+        certificacion.setId( dto.getId() );
+        certificacion.setNombre( dto.getNombre() );
+        certificacion.setInstitucion( dto.getInstitucion() );
+        certificacion.setDescripcion( dto.getDescripcion() );
+
         return certificacion;
     }
 
@@ -39,6 +49,19 @@ public class CertificacionMapperImpl implements CertificacionMapper {
     public void updateEntityFromDto(CertificacionDTO dto, Certificacion entity) {
         if ( dto == null ) {
             return;
+        }
+
+        if ( dto.getId() != null ) {
+            entity.setId( dto.getId() );
+        }
+        if ( dto.getNombre() != null ) {
+            entity.setNombre( dto.getNombre() );
+        }
+        if ( dto.getInstitucion() != null ) {
+            entity.setInstitucion( dto.getInstitucion() );
+        }
+        if ( dto.getDescripcion() != null ) {
+            entity.setDescripcion( dto.getDescripcion() );
         }
     }
 }

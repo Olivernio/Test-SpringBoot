@@ -53,15 +53,9 @@ public class CentroMedicoService {
                 .orElseThrow(() -> new RuntimeException("Centro médico no encontrado con id: " + id));
 
         // **Validación FK (Externa/Local): paisId**
-        validarPais(dto.getPaisId()); // Llama al método de validación
-
-        // ESTO NO ES NECESARIO, ESTa FUNCION LO HACE EL MAPPER
-        existente.setNombre(dto.getNombre());
-        existente.setDireccion(dto.getDireccion());
-        existente.setTelefono(dto.getTelefono());
-        existente.setEmail(dto.getEmail());
-        existente.setSitioWeb(dto.getSitioWeb());
-        existente.setPaisId(dto.getPaisId());
+        validarPais(dto.getPaisId()); 
+        
+        centroMedicoMapper.updateEntityFromDto(dto, existente);
 
         CentroMedico actualizado = centroMedicoRepository.save(existente);
         return centroMedicoMapper.toDTO(actualizado);

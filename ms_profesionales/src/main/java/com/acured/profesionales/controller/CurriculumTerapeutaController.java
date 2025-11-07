@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/profesionales/curriculum") // Nueva ruta base
+@RequestMapping("/api/curriculum") // Nueva ruta base
 @RequiredArgsConstructor
 public class CurriculumTerapeutaController {
 

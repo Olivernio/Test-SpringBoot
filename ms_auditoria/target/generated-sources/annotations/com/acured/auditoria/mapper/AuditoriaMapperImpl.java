@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-06T01:06:33-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.16 (Eclipse Adoptium)"
+    date = "2025-11-07T15:32:05-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
 public class AuditoriaMapperImpl implements AuditoriaMapper {
@@ -21,6 +21,12 @@ public class AuditoriaMapperImpl implements AuditoriaMapper {
 
         AuditoriaDTO auditoriaDTO = new AuditoriaDTO();
 
+        auditoriaDTO.setId( entity.getId() );
+        auditoriaDTO.setTabla( entity.getTabla() );
+        auditoriaDTO.setOperacion( entity.getOperacion() );
+        auditoriaDTO.setUsuarioId( entity.getUsuarioId() );
+        auditoriaDTO.setFecha( entity.getFecha() );
+
         return auditoriaDTO;
     }
 
@@ -32,6 +38,12 @@ public class AuditoriaMapperImpl implements AuditoriaMapper {
 
         Auditoria auditoria = new Auditoria();
 
+        auditoria.setId( dto.getId() );
+        auditoria.setTabla( dto.getTabla() );
+        auditoria.setOperacion( dto.getOperacion() );
+        auditoria.setUsuarioId( dto.getUsuarioId() );
+        auditoria.setFecha( dto.getFecha() );
+
         return auditoria;
     }
 
@@ -39,6 +51,22 @@ public class AuditoriaMapperImpl implements AuditoriaMapper {
     public void updateEntityFromDto(AuditoriaDTO dto, Auditoria entity) {
         if ( dto == null ) {
             return;
+        }
+
+        if ( dto.getId() != null ) {
+            entity.setId( dto.getId() );
+        }
+        if ( dto.getTabla() != null ) {
+            entity.setTabla( dto.getTabla() );
+        }
+        if ( dto.getOperacion() != null ) {
+            entity.setOperacion( dto.getOperacion() );
+        }
+        if ( dto.getUsuarioId() != null ) {
+            entity.setUsuarioId( dto.getUsuarioId() );
+        }
+        if ( dto.getFecha() != null ) {
+            entity.setFecha( dto.getFecha() );
         }
     }
 }

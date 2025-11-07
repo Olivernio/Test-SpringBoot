@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/clinico/centros-medicos")
-@RequiredArgsConstructor // <--- Reemplaza @Autowired
+@RequestMapping("/api/centros-medicos")
+@RequiredArgsConstructor
 public class CentroMedicoController {
 
-    // @Autowired // Eliminado
-    private final CentroMedicoService centroMedicoService; // <--- Declarado como final
+    private final CentroMedicoService centroMedicoService;
 
     @GetMapping
     public ResponseEntity<List<CentroMedicoDTO>> obtenerTodos() {

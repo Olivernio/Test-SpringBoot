@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/profesionales/centros-medicos")
+@RequestMapping("/api/centros-medicos")
 @RequiredArgsConstructor // <--- Reemplaza @Autowired
 public class CentroMedicoController {
 

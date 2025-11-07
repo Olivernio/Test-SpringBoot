@@ -2,8 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- Modelo base de Maven -->
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- 1. Herencia del POM padre 'clinica-monorepo' -->
     <parent>
         <groupId>com.acured</groupId>
         <artifactId>clinica-monorepo</artifactId>
@@ -11,36 +14,78 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <!-- Coordenadas GAV -->
     <artifactId>common</artifactId>
     <name>Acured Common Library</name>
-    <description>Librería compartida con DTOs y validaciones</description>
-    <packaging>jar</packaging>
+    <description>Librería compartida con DTOs, Excepciones y Mappers (Acured)</description>
+    <packaging>jar</packaging> <!-- Es una librería, no una app -->
 
     <dependencies>
+        <!--
+            Todas las dependencias heredan su versión del 'dependencyManagement' del padre
+        -->
+
+        <!-- Lombok (para @Data, @Builder, etc.) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <scope>provided</scope> <!-- Solo necesario en compilación -->
         </dependency>
 
+        <!--
+            MapStruct (para Mappers)
+            Añadido desde el ejemplo de EduTech. Es necesario para tus mappers.
+        -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <scope>provided</scope> <!-- Solo necesario en compilación -->
+        </dependency>
+
+        <!--
+            Validación (para anotaciones @NotNull, @Size, @Email en DTOs)
+        -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.el</artifactId>
         </dependency>
+        
+        <!--
+           Spring Web (Añadida)
+           Necesaria para que el GlobalExceptionHandler (@RestControllerAdvice) 
+           y las anotaciones de Spring MVC (@ResponseStatus) compilen.
+        -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
 
+        <!--
+            OpenFeign (para comunicación entre MS)
+            Se marca como 'optional' para que los módulos hijos decidan si usarlo o no.
+        -->
         <dependency>
              <groupId>org.springframework.cloud</groupId>
              <artifactId>spring-cloud-starter-openfeign</artifactId>
              <optional>true</optional> 
         </dependency>
-        
-        </dependencies>
+    </dependencies>
 
+    <!--
+        BUILD CONFIGURATION
+        Esto es crucial para un módulo 'common'.
+        Hereda el 'spring-boot-maven-plugin' del padre, pero le decimos
+        que NO intente crear un JAR ejecutable (repackage),
+        ya que esto es una librería y no tiene clase @SpringBootApplication.
+    -->
     <build>
         <plugins>
             <plugin>
@@ -51,6 +96,7 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                         <!-- Esto deshabilita el 'repackage' para este módulo -->
                          <phase>none</phase> 
                     </execution>
                 </executions>

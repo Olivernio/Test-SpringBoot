@@ -13,7 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException; // Import necesa
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/clinico/tratamientos")
+@RequestMapping("/api/tratamientos")
 @RequiredArgsConstructor
 public class TratamientoController { // Esta es la única clase que debe estar en este archivo
 

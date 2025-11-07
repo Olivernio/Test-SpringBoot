@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/profesionales/certificaciones") // Nueva ruta base
+@RequestMapping("/api/certificaciones") // Nueva ruta base
 @RequiredArgsConstructor
 public class CertificacionController {
 

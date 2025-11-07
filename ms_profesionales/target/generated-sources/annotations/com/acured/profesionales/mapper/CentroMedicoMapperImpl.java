@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-06T01:06:31-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.16 (Eclipse Adoptium)"
+    date = "2025-11-07T15:31:58-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
 public class CentroMedicoMapperImpl implements CentroMedicoMapper {
@@ -22,6 +22,14 @@ public class CentroMedicoMapperImpl implements CentroMedicoMapper {
 
         CentroMedicoDTO centroMedicoDTO = new CentroMedicoDTO();
 
+        centroMedicoDTO.setId( centro.getId() );
+        centroMedicoDTO.setNombre( centro.getNombre() );
+        centroMedicoDTO.setDireccion( centro.getDireccion() );
+        centroMedicoDTO.setTelefono( centro.getTelefono() );
+        centroMedicoDTO.setEmail( centro.getEmail() );
+        centroMedicoDTO.setSitioWeb( centro.getSitioWeb() );
+        centroMedicoDTO.setPaisId( centro.getPaisId() );
+
         return centroMedicoDTO;
     }
 
@@ -33,6 +41,39 @@ public class CentroMedicoMapperImpl implements CentroMedicoMapper {
 
         CentroMedico centroMedico = new CentroMedico();
 
+        centroMedico.setNombre( dto.getNombre() );
+        centroMedico.setDireccion( dto.getDireccion() );
+        centroMedico.setTelefono( dto.getTelefono() );
+        centroMedico.setEmail( dto.getEmail() );
+        centroMedico.setPaisId( dto.getPaisId() );
+        centroMedico.setSitioWeb( dto.getSitioWeb() );
+
         return centroMedico;
+    }
+
+    @Override
+    public void updateEntityFromDto(CentroMedicoCreateDTO dto, CentroMedico entity) {
+        if ( dto == null ) {
+            return;
+        }
+
+        if ( dto.getNombre() != null ) {
+            entity.setNombre( dto.getNombre() );
+        }
+        if ( dto.getDireccion() != null ) {
+            entity.setDireccion( dto.getDireccion() );
+        }
+        if ( dto.getTelefono() != null ) {
+            entity.setTelefono( dto.getTelefono() );
+        }
+        if ( dto.getEmail() != null ) {
+            entity.setEmail( dto.getEmail() );
+        }
+        if ( dto.getPaisId() != null ) {
+            entity.setPaisId( dto.getPaisId() );
+        }
+        if ( dto.getSitioWeb() != null ) {
+            entity.setSitioWeb( dto.getSitioWeb() );
+        }
     }
 }
